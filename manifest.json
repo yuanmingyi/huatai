@@ -1,0 +1,17 @@
+{
+    "manifest_version": 2,
+    "name": "huatai.ext",
+    "version": "1.0",
+    "description": "huatai assist",
+    "browser_action": {
+        "default_icon": "favicon.ico",
+        "default_title": "华泰助手",
+        "default_popup": "index.html"
+    },
+    "options_page": "options.html",
+    "permissions": [
+        "cookies",
+        "tabs",
+        "https://service.htsc.com.cn/"
+    ]    
+}
