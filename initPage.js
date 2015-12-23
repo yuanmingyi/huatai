@@ -1,7 +1,7 @@
 // initPage.js
 (function() {    
     jQuery(document).ready(function() {
-        var options = localStorage["login_options"];
+        var options = loadLoginOption();
         var form = document.forms[0];
         if (!options) {
             $(form["login"]).prop("disabled", true);
