@@ -13,13 +13,18 @@
         var huatai = new HuataiAssit(options.username, options.pwd, options.trdpwd, options.hdd, options.ip, options.mac);
 
         function init() {
-            $("#captcha").attr("src", huatai.getCaptchaUrl());
             chrome.cookies.get({
                 "url":huatai.getBaseUrl(),
                 "name":"JSESSIONID"
             }, function(cookie) {
+                if (!cookie || !cookie.value) {
+                    $("#huataiLink").attr("href", huatai.getHqUrl()).text("open website");
+                    return;
+                }
+
                 $("#sessionId").text(cookie.value);
                 huatai.init(cookie.value);
+                $("#captcha").attr("src", huatai.getCaptchaUrl());
             });
         }
 
