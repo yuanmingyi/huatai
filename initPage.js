@@ -10,7 +10,7 @@
         }
 
         var captcha = form["captcha"];
-        var huatai = new HuataiAssit(options.username, options.pwd, options.trdpwd, options.hdd, options.ip, options.mac);
+        var huatai = new HuataiAssist(options.username, options.pwd, options.trdpwd, options.hdd, options.ip, options.mac);
 
         function init() {
             chrome.cookies.get({

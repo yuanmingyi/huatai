@@ -2,7 +2,7 @@
  * Created by millan on 12/19/2015.
  */
 
-function HuataiAssit(userId, pwd, trdpwd, hdd, ip, mac) {
+function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
     this.userId = userId;
     this.pwd = pwd;
     this.trdpwd = trdpwd;
@@ -21,6 +21,7 @@ function HuataiAssit(userId, pwd, trdpwd, hdd, ip, mac) {
     var biUrl = baseUrl.concat("/service/flashbusiness_new3.jsp?etfCode=");
 
     var baseTradeUrl = "https://tradegw.htsc.com.cn/";
+    var baseHqUrl = "http://hq.htsc.com.cn/cssweb";
 
     this.getBaseUrl = function() {
         return baseUrl;
@@ -96,7 +97,43 @@ function HuataiAssit(userId, pwd, trdpwd, hdd, ip, mac) {
         })
     }
 
-    this.sendTradeReq = function (paramMap, reqType, funcId, exType) {
+    this.buy = function (stockCode, entrustAmount, entrustPrice) {
+        var stockInfo = queryStock(stockCode);
+
+        var paramMap = {
+            "stock_code": stockCode,
+            "entrust_amount": entrustAmount,
+            "entrust_price": entrustPrice,
+            "entrust_prop": 0,
+            "entrust_bs": 1
+        };
+        tradeReq(paramMap, "STOCK_BUY", "302", stockInfo.market);
+    }
+
+    this.queryStock = function (stockCode) {
+        var url = baseHqUrl
+            + "?type=GET_PRICE_VOLUMEJY^cssweb_type=GET_HQ_B^stockcode="
+            + stockCode
+            + "^"
+            + Math.random();
+
+        var stock = {};
+        $.ajax({
+            "async": false,
+            "url": url,
+            "success": function (data) {
+                var stockInfo = JSON.parse(data);
+                if (stockInfo["cssweb_code"] == "success") {
+                    stock = stockInfo["item"];
+                }
+            },
+            "type": "GET"
+        });
+
+        return stock;
+    }
+
+    this.sendTradeReq = function tradeReq(paramMap, reqType, funcId, exType) {
         var fundAccount = null;
         var stockAccount = null;
         for(var t in this.userdata["item"]) {
@@ -120,13 +157,18 @@ function HuataiAssit(userId, pwd, trdpwd, hdd, ip, mac) {
             + "&stock_account=" + stockAccount
             + "&ram=" + Math.random();
 
-        for (var param in paramMap) {
-            querystring += "&" + param["name"] + "=" + param["value"];
+        for (var key in paramMap) {
+            if (paramMap.hasOwnProperty(key)) {
+                querystring += "&" + key + "=" + paramMap[key];
+            }
         }
+
+        var url = this.baseTradeUrl + "?" + base64encode(querystring);
+        console.log("request url: " + url);
 
         $.ajax({
             "method":"GET",
-            "url": this.baseTradeUrl + "?" + base64encode(querystring),
+            "url": url,
             "complete": function(data) {
                 alert(base64decode(data));
             }

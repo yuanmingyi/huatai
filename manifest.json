@@ -13,5 +13,6 @@
         "cookies",
         "tabs",
         "https://service.htsc.com.cn/"
-    ]    
+    ],
+    "content_security_policy": "script-src 'self' https://service.htsc.com.cn; object-src 'self'"
 }
