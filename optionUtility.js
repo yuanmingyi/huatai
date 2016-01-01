@@ -24,7 +24,7 @@
 
     win.saveLoginOption = function(option) {
         var option_str = JSON.stringify(option);
-        localStorage[loginKey].setItem(option_str);
+        localStorage[loginKey] = option_str;
     }
 
 })(window);

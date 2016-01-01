@@ -97,9 +97,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
         })
     }
 
-    this.buy = function (stockCode, entrustAmount, entrustPrice) {
-        var stockInfo = queryStock(stockCode);
-
+    this.buy = function (market, stockCode, entrustAmount, entrustPrice) {
         var paramMap = {
             "stock_code": stockCode,
             "entrust_amount": entrustAmount,
@@ -107,7 +105,12 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             "entrust_prop": 0,
             "entrust_bs": 1
         };
-        tradeReq(paramMap, "STOCK_BUY", "302", stockInfo.market);
+
+        tradeReq(paramMap, "STOCK_BUY", "302", market);
+    }
+
+    this.queryTick = function (stockCode, market, from, to) {
+
     }
 
     this.queryStock = function (stockCode) {
@@ -117,7 +120,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             + "^"
             + Math.random();
 
-        var stock = {};
+        var stock = null;
         $.ajax({
             "async": false,
             "url": url,
@@ -126,6 +129,32 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
                 if (stockInfo["cssweb_code"] == "success") {
                     stock = stockInfo["item"];
                 }
+            },
+            "type": "GET"
+        });
+
+        return stock;
+    }
+
+    this.queryDetail = function (stockCode, stockType, market, success, failure) {
+        var exchange = (market === 1 ? "sh" : "sz");
+        var url = baseHqUrl
+            + "?type=GET_PRICE_VOLUMEJSON&exchange=" + exchange
+            + "&stockcode=" + stockCode
+            + "&stocktype=" + stockType
+            + "&radom=" + Math.random();
+
+        var async = (typeof success !== 'undefined');
+        var stock = null;
+        var req = $.ajax({
+            "async": async,
+            "url": url,
+            "success": function (data) {
+                var stockInfo = JSON.parse(data);
+                if (stockInfo["cssweb_code"] == "success") {
+                    stock = stockInfo["data"];
+                }
+                success(stock);
             },
             "type": "GET"
         });
@@ -174,4 +203,8 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             }
         });
     };
+
+    function getStockTypeFromStockCode(stockCode) {
+        return 0;
+    }
 }
