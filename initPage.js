@@ -2,7 +2,7 @@
 (function() {    
     jQuery(document).ready(function() {
         var options = loadLoginOption();
-        var form = document.forms[0];
+        var form = document.getElementById("loginForm");
         if (!options) {
             $(form["login"]).prop("disabled", true);
             $("#loginStatus").text("set the login options first");
