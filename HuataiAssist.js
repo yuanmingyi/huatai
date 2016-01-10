@@ -128,7 +128,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             "headers": {
                 "JSESSIONID": this.sessionId
             },
-            "success": function (data) {
+            "success": function(data) {
                 console.log(biUrl + ":" + data);
                 // search user data in response html
                 var result = data.match(pattern);
@@ -138,7 +138,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
                     alert("load user data failed!");
                 }
             },
-            "error": function (xhr, status, err) {
+            "error": function(xhr, status, err) {
                 console.log(biUrl + ":" + status + "-" + err);
             }
         })
@@ -197,7 +197,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //
 // sell with market price
 //
-    this.sellMp = function (market, stockCode, entrustAmount, entrustPrice, remain, complete) {
+    this.sellMp = function(market, stockCode, entrustAmount, entrustPrice, remain, complete) {
         var entrustProp = (remain === "undo" ? "U" : "R");
         var paramMap = {
             "stock_code": stockCode,
@@ -217,7 +217,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //
 // get cancel list
 //
-    this.getWithdrawList = function (complete) {
+    this.getWithdrawList = function(complete) {
         var paramMap = {
             "stock_code": "",
             "locate_entrust_no": "",
@@ -233,7 +233,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //
 // get entrust list
 //
-    this.getEntrustList = function (complete) {
+    this.getEntrustList = function(complete) {
         var paramMap = {
             "stocke_code": "",
             "locate_entrust_no": "",
@@ -245,6 +245,38 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 
         tradeReq(paramMap, "GET_TODAY_ENTRUST", "401", "", complete);
     }
+
+// helper function
+   var genGetAjaxOption = function (url, complete, dataHandler) {
+        return {
+            "url": url,
+            "success": function(data) {
+                try {
+                    var stockInfo = data;
+                    if (typeof data === "string") {
+                        stockInfo = JSON.parse(data);
+                    } else {
+                        data = JSON.stringify(data);
+                    }
+
+                    console.log(url + ":" + data);
+                    var result = stockInfo["cssweb_code"];
+                    if (result === "success") {
+                        complete("", dataHandler(stockInfo));
+                    } else {
+                        complete(result, data);
+                    }
+                } catch (err) {
+                    complete("exception", err);
+                }
+            },
+            "error": function(xhr, status, err) {
+                console.log(url + ":" + status + "-" + err);
+                complete(status, err);
+            },
+            "method": "GET"
+        }
+    };
 
 // get tick detail response:
 //
@@ -265,7 +297,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //     "returnflag": "",
 //     "detailtype": "normal"
 // }
-    this.queryTickDetail = function (stockCode, market, from, to, complete) {
+    this.queryTickDetail = function(stockCode, market, from, to, complete) {
         var exchange = marketToExchange(market);
         var url = baseHqUrl
             + "?type=GET_TICK_DETAILNORMAL&exchange=" + exchange
@@ -274,28 +306,11 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             + "&to=" + to
             + "&radom=" + Math.random();
 
-        $.ajax({
-            "url": url,
-            "method": "GET",
-            "success": function (data) {
-                console.log(url + ":" + data);
-                try {
-                    var stockInfo = JSON.parse(data);
-                    var result = stockInfo["cssweb_code"];
-                    if (result === "success") {
-                        complete("", stockInfo);
-                    } else {
-                        complete(result, data);
-                    }
-                } catch (err) {
-                    console.log("exception", err);
-                }
-            },
-            "error": function (xhr, status, err) {
-                console.log(url + ":" + status + "-" + err);
-                complete(status, err);
-            }
+        var option = genGetAjaxOption(url, complete, function(data) {
+            return data;
         });
+
+        $.ajax(option);
     }
 
 // get stock tick response:
@@ -322,7 +337,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //         [13.35, 668346.7, 914140740.54, "2015-12-31 15:00:00"]
 //     ]
 // }
-    this.queryTick = function (stockCode, market, from, complete) {
+    this.queryTick = function(stockCode, market, from, complete) {
         var exchange = marketToExchange(market);
         var url = baseHqUrl
             + "?type=GET_TICK&exchange=" + exchange
@@ -330,28 +345,11 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             + "&from=" + from
             + "&radom=" + Math.random();
 
-        $.ajax({
-            "url": url,
-            "method": "GET",
-            "success": function (data) {
-                console.log(url + ":" + data);
-                try {
-                    var stockInfo = JSON.parse(data);
-                    var result = stockInfo["cssweb_code"];
-                    if (result === "success") {
-                        complete("", stockInfo);
-                    } else {
-                        complete(result, data);
-                    }
-                } catch (err) {
-                    console.log("exception", err);
-                }
-            },
-            "error": function (xhr, status, err) {
-                console.log(url + ":" + status + "-" + err);
-                complete(status, err);
-            }
+        var option = genGetAjaxOption(url, complete, function(data) {
+            return data;
         });
+
+        $.ajax(option);
     }
 
 // get stock info response:
@@ -397,35 +395,18 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //         "dt": 12.330000
 //     }]
 // }
-    this.queryStock = function (stockCode, complete) {
+    this.queryStock = function(stockCode, complete) {
         var url = baseHqUrl
             + "?type=GET_PRICE_VOLUMEJY^cssweb_type=GET_HQ_B^stockcode="
             + stockCode
             + "^"
             + Math.random();
 
-        $.ajax({
-            "url": url,
-            "success": function (data) {
-                console.log(url + ":" + data);
-                try {
-                    var stockInfo = JSON.parse(data);
-                    var result = stockInfo["cssweb_code"];
-                    if (result === "success") {
-                        complete("", stockInfo["item"]);
-                    } else {
-                        complete(result, data);
-                    }
-                } catch (err) {
-                    complete("exception", err);
-                }
-            },
-            "error": function (xhr, status, err) {
-                console.log(url + ":" + status + "-" + err);
-                complete(status, err);
-            },
-            "method": "GET"
+        var option = genGetAjaxOption(url, complete, function(data) {
+            return data["item"][0];
         });
+
+        $.ajax(option);
     }
 
 // get stock detail response
@@ -484,7 +465,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //         "wp": 205247.000000
 //     }]
 // }
-    this.queryDetail = function (stockCode, stockType, market, complete) {
+    this.queryDetail = function(stockCode, stockType, market, complete) {
         var exchange = marketToExchange(market);
         var url = baseHqUrl
             + "?type=GET_PRICE_VOLUMEJSON&exchange=" + exchange
@@ -492,28 +473,11 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             + "&stocktype=" + stockType
             + "&radom=" + Math.random();
 
-        $.ajax({
-            "url": url,
-            "success": function (data) {
-                console.log(url + ":" + data);
-                try {
-                    var stockInfo = JSON.parse(data);
-                    var result = stockInfo["cssweb_code"];
-                    if (result === "success") {
-                        complete("", stockInfo["data"]);
-                    } else {
-                        complete(result, data);
-                    }
-                } catch (err) {
-                    complete("exception", err);
-                }
-            },
-            "error": function (xhr, status, err) {
-                console.log(url + ":" + status + "-" + err);
-                complete(status, err);
-            },
-            "method": "GET"
+        var option = genGetAjaxOption(url, complete, function(data) {
+            return data["data"][0];
         });
+
+        $.ajax(option);
     }
 
     this.sendTradeReq = function tradeReq(paramMap, reqType, funcId, exType, complete) {

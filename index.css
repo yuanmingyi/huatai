@@ -3,9 +3,16 @@ body
 	font-size: 12px;
 }
 
-div#content
+#content
 {
 	margin: 5px;
+}
+
+#statusBar
+{
+	position: absolute;
+	height: 13px;
+	bottom: 0;
 }
 
 input[type=text]
@@ -29,4 +36,31 @@ select
 label
 {
 	margin-right: 5px;
+}
+
+td
+{
+	padding: 5px;
+}
+
+#dataSection
+{
+	margin: 5px;
+	position: relative;
+	width: 100%;
+	#background-color: blue;
+}
+
+#latestOrder
+{
+	width: 50%;
+	#background-color: red;
+}
+
+#stats
+{
+	position: absolute;
+	left: 50%;
+	top: 0;
+	#background-color: green;
 }

@@ -10,7 +10,7 @@
         <script type="text/javascript" src="jquery-1.10.2.min.js"></script>
         <script type="text/javascript" src="optionUtility.js"></script>
         <script type="text/javascript" src="HuataiAssist.js"></script>
-        <script type="text/javascript" src="initPage.js"></script>
+        <script type="text/javascript" src="index.js"></script>
         <link rel="stylesheet" type="text/css" href="index.css" />
     </head>
     <body>
@@ -19,26 +19,28 @@
                 <div><img id="captcha" /></div>
                 <div><a id="huataiLink" target="_blank"></a><span id="sessionId"></span></div>
                 <form id="loginForm">
-                    <label>captcha:</label><input type="text" name="captcha" /><br/>
+                    <label>captcha:</label><input type="text" name="captcha" />
                     <input type="button" name="login" value="login" /><span id="loginStatus"></span><br/>
                 </form>
             </div>
             <div id="tradeSection">
                 <form id="tradeForm">
-                    <label>stock code:</label><input type="text" name="stockCode" /><br/>
+                    <label>stock code:</label><input type="text" name="stockCode" />
                     <label id="market"></label><br/>
                     <select name="tradeType">
                         <option value="buy">buy with limit price</option>
                         <option value="buyMp">buy with market price</option>
                         <option value="sell">sell with limit price</option>
                         <option value="sellMp">sell with market price</option>
-                    </select><br/>
+                    </select>
+                    <input type="button" name="trade" value="entrust" /><span id="tradeStatus"></span><br/>
                     <label>trade price:</label><input type="text" name="tradePrice" /><br/>
                     <label>trade amount:</label><input type="text" name="tradeAmount" /><br/>
-                    <input type="button" name="trade" value="do" /><span id="tradeStatus"></span><br/>
+                    <label>refresh interval:</label><input type="number" name="timeout" min="1" max="60" value="1" /><br/>
                 </from>
             </div>
             <div id="dataSection">
+                <div id="latestOrder">
                 <table>
                     <tr>
                         <td>stock</td><td id="stockName"></td><td id="stockCode"></td>
@@ -73,17 +75,35 @@
                     <tr>
                         <td>buy5</td><td id="bjw5"></td><td id="bsl5"></td>
                     </tr>
+                </table>
+                </div>
+                <div id="stats">
+                <table>
                     <tr>
-                        <td>current price</td><td id="currentPrice"></td><td>last date</td><td id="lastDatePrice"></td>
+                        <td>latest deal price</td><td id="price"></td>
                     </tr>
                     <tr>
-                        <td>offset</td><td id="offset"></td><td>off rate</td><td id="offRate"></td>
+                        <td>volumn</td><td id="volumn"></td>
                     </tr>
                     <tr>
-                        <td>high stop</td><td id="highStop"></td><td>low stop</td><td id="lowStop"></td>
+                        <td>yesterday close</td><td id="close"></td>
+                    </tr>
+                    <tr>
+                        <td>today opening</td><td id="opening"></td>
+                    </tr>
+                    <tr>
+                        <td>inc rate</td><td id="incRate"></td>
+                    </tr>
+                    <tr>
+                        <td>high stop</td><td id="highStop"></td>
+                    </tr>
+                    <tr>
+                        <td>low stop</td><td id="lowStop"></td>
                     </tr>
                 </table>
+                </div>
             </div>
         </div>
+        <div id = "statusBar"><span>status: </span><label id="status"></label></div>
     </body>
 </html>
