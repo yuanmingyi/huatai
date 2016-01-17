@@ -39,12 +39,12 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
         return jyUrl;
     }
 
-    this.init = function init(sessionId) {
+    this.init = function(sessionId) {
         this.sessionId = sessionId;
         $.getScript(base64Url);
     }
 
-    this.login = function login(vcode, callback) {
+    this.login = function(vcode, callback) {
         var params = "userType=jy" +
             "&loginEvent=1" +
             "&trdpwdEns=" + this.trdpwd +
@@ -69,7 +69,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
         });
     }
 
-    this.logout = function logout(callback) {
+    this.logout = function(callback) {
         $.ajax({
             "url": logoutUrl,
             "method": "POST",
@@ -87,7 +87,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //     "item": [
 //         {
 //             "exchange_type": "1",
-//             "exchange_name": "�",
+//             "exchange_name": "�?",
 //             "holder_status": "0",
 //             "stock_account": "A365521154",
 //             "fund_account": "666625283528",
@@ -96,7 +96,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //         },
 //         {
 //             "exchange_type": "2",
-//             "exchange_name": "�",
+//             "exchange_name": "�?",
 //             "holder_status": "0",
 //             "stock_account": "0191042364",
 //             "fund_account": "666625283528",
@@ -112,16 +112,16 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //     "branch_no": "54",
 //     "trdpwd": "NpQXCQ856aAtrHjhT1W3ZQ$$",
 //     "client_risklevel": "3",
-//     "op_station": "PC;IIP:123.125.226.134;LIP:192.168.0.106;MAC:346895ED8BCB;HD:IE250N4015302044;NT:PCN[δ猐,CPU[δ猐,PI[δ猐@ymwt|V1.0.1.2",
-//     "client_name": "�",
+//     "op_station": "PC;IIP:123.125.226.134;LIP:192.168.0.106;MAC:346895ED8BCB;HD:IE250N4015302044;NT:PCN[δ�?,CPU[δ�?,PI[δ猐@ymwt|V1.0.1.2",
+//     "client_name": "�?",
 //     "cssweb_code": "success",
 //     "client_rights": "eWt",
 //     "account_content": "666625283528",
-//     "last_op_station": "PC;IIP:123.125.226.134;LIP:192.168.0.106;MAC:346895ED8BCB;HD:IE250N4015302044;NT:PCN[δ猐,CPU[δ猐,PI[δ猐@ymwt|V1.0.1.2;BBXX=YMWT"
+//     "last_op_station": "PC;IIP:123.125.226.134;LIP:192.168.0.106;MAC:346895ED8BCB;HD:IE250N4015302044;NT:PCN[δ�?,CPU[δ�?,PI[δ猐@ymwt|V1.0.1.2;BBXX=YMWT"
 // }
 //
     var pattern = /<script\s+.*?>\s*var data ?= ?"(.*?)";\s*<\/script>/im;
-    this.loadUserData = function loadUserData() {
+    this.loadUserData = function(complete) {
         $.ajax({
             "url": biUrl,
             "method": GET,
@@ -135,23 +135,77 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
                 var data = result[1];
                 this.userdata = JSON.parse(base64decode(data));
                 if (!this.userdata) {
-                    alert("load user data failed!");
+                    console.log("load user data failed!");
+                    complete("error", "load user data failed!");
+                } else {
+                    complete("", this.userdata);
                 }
             },
             "error": function(xhr, status, err) {
                 console.log(biUrl + ":" + status + "-" + err);
+                complete(status, err);
             }
-        })
-    }
+        });
+    };
 
 //
 //  ajax methods
 //
 
+    this.sendTradeReq = function(paramMap, reqType, funcId, exType, complete) {
+        if (!!this.userdata) {
+            complete("error", "login first!");
+            return;
+        }
+
+        var stockAccount = "";
+        for(var t in this.userdata["item"]) {
+            if (t["exchange_type"] == exType) {
+                stockAccount = t["stock_account"];
+                break;
+            }
+        };
+
+        var querystring = "uid=" + this.userdata["uid"]
+            + "&cssweb_type=" + reqType
+            + "&version=1&custid=" + this.userdata["account_content"]
+            + "&op_branch_no=" + this.userdata["branch_no"]
+            + "&branch_no=" + this.userdata["branch_no"]
+            + "&op_entrust_way=7&op_station=" + this.userdata["op_station"]
+            + "&function_id=" + funcId
+            + "&fund_account=" + this.userdata["fund_account"]
+            + "&password=" + this.userdata["trdpwd"]
+            + "&identity_type=&exchange_type=" + exType
+            + "&stock_account=" + stockAccount
+            + "&ram=" + Math.random();
+
+        for (var key in paramMap) {
+            if (paramMap.hasOwnProperty(key)) {
+                querystring += "&" + key + "=" + paramMap[key];
+            }
+        }
+
+        var url = this.baseTradeUrl + "?" + base64encode(querystring);
+        console.log("request url: " + url);
+
+        $.ajax({
+            "url": url,
+            "method": "GET",
+            "success": function(data) {
+                console.log(url + ":" + data);
+                complete("", base64decode(data));
+            },
+            "error": function(xhr, status, err) {
+                console.log(url + ":" + status + "-" + err);
+                complete(status, err);
+            }
+        });
+    };
+
 //
 // buy with limited price
 //
-    this.buy = function (market, stockCode, entrustAmount, entrustPrice, complete) {
+    this.buy = function(market, stockCode, entrustAmount, entrustPrice, complete) {
         var paramMap = {
             "stock_code": stockCode,
             "entrust_amount": entrustAmount,
@@ -160,14 +214,14 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             "entrust_bs": 1
         };
 
-        tradeReq(paramMap, "STOCK_BUY", "302", market, complete);
+        return this.sendTradeReq(paramMap, "STOCK_BUY", "302", market, complete);
     }
 
 // 
 // buy with market price
 //
-    this.buyMp = function (market, stockCode, entrustAmount, entrustPrice, remain, complete) {
-        var entrustProp = (remain === "undo" ? "U" : "R");
+    this.buyMp = function(market, stockCode, entrustAmount, entrustPrice, complete, undo) {
+        var entrustProp = undo ? "U" : "R";
         var paramMap = {
             "stock_code": stockCode,
             "entrust_amount": entrustAmount,
@@ -176,13 +230,13 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             "entrust_bs": 1
         };
 
-        tradeReq(paramMap, "STOCK_BUY_MP", "302", market, complete);
+        return this.sendTradeReq(paramMap, "STOCK_BUY_MP", "302", market, complete);
     }
 
 //
 // sell with limited price
 //
-    this.sell = function (market, stockCode, entrustAmount, entrustPrice, complete) {
+    this.sell = function(market, stockCode, entrustAmount, entrustPrice, complete) {
         var paramMap = {
             "stock_code": stockCode,
             "entrust_amount": entrustAmount,
@@ -191,14 +245,14 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             "entrust_bs": 2
         };
 
-        tradeReq(paramMap, "STOCK_SALE", "302", market, complete);
+        return this.sendTradeReq(paramMap, "STOCK_SALE", "302", market, complete);
     }
 
 //
 // sell with market price
 //
-    this.sellMp = function(market, stockCode, entrustAmount, entrustPrice, remain, complete) {
-        var entrustProp = (remain === "undo" ? "U" : "R");
+    this.sellMp = function(market, stockCode, entrustAmount, entrustPrice, complete, undo) {
+        var entrustProp = undo ? "U" : "R";
         var paramMap = {
             "stock_code": stockCode,
             "entrust_amount": entrustAmount,
@@ -207,7 +261,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             "entrust_bs": 2
         };
 
-        tradeReq(paramMap, "STOCK_SALE_MP", "302", market, complete);
+        return this.sendTradeReq(paramMap, "STOCK_SALE_MP", "302", market, complete);
     }
 
     function marketToExchange(market) {
@@ -227,7 +281,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             "position_str": ""
         };
 
-        tradeReq(paramMap, "GET_CANCEL_LIST", "401", "", complete);
+        return this.sendTradeReq(paramMap, "GET_CANCEL_LIST", "401", "", complete);
     }
 
 //
@@ -243,11 +297,11 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             "position_str": ""
         };
 
-        tradeReq(paramMap, "GET_TODAY_ENTRUST", "401", "", complete);
+        return this.sendTradeReq(paramMap, "GET_TODAY_ENTRUST", "401", "", complete);
     }
 
 // helper function
-   var genGetAjaxOption = function (url, complete, dataHandler) {
+   var genGetAjaxOption = function(url, complete, dataHandler) {
         return {
             "url": url,
             "success": function(data) {
@@ -319,7 +373,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //     "cssweb_code": "success",
 //     "type": "GET_TICK",
 //     "stockcode": "sz000012",
-//     "zqjc": "南  玻Ａ",
+//     "zqjc": "�?  玻Ａ",
 //     "jrkp": 13.7,
 //     "close": 13.7,
 //     "zqlb": 11,
@@ -383,7 +437,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //         "bjw5": 13.300000,
 //         "bsl5": 1186.000000,
 //         "zqdm": "000012",
-//         "zqjc": "南  玻Ａ",
+//         "zqjc": "�?  玻Ａ",
 //         "zrsp": 13.700000,
 //         "jrkp": 13.700000,
 //         "zjcj": 13.350000,
@@ -480,52 +534,4 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
         $.ajax(option);
     }
 
-    this.sendTradeReq = function tradeReq(paramMap, reqType, funcId, exType, complete) {
-        var stockAccount = "";
-        for(var t in this.userdata["item"]) {
-            if (t["exchange_type"] == exType) {
-                stockAccount = t["stock_account"];
-                break;
-            }
-        };
-
-        var querystring = "uid=" + this.userdata["uid"]
-            + "&cssweb_type=" + reqType
-            + "&version=1&custid=" + this.userdata["account_content"]
-            + "&op_branch_no=" + this.userdata["branch_no"]
-            + "&branch_no=" + this.userdata["branch_no"]
-            + "&op_entrust_way=7&op_station=" + this.userdata["op_station"]
-            + "&function_id=" + funcId
-            + "&fund_account=" + this.userdata["fund_account"]
-            + "&password=" + this.userdata["trdpwd"]
-            + "&identity_type=&exchange_type=" + exType
-            + "&stock_account=" + stockAccount
-            + "&ram=" + Math.random();
-
-        for (var key in paramMap) {
-            if (paramMap.hasOwnProperty(key)) {
-                querystring += "&" + key + "=" + paramMap[key];
-            }
-        }
-
-        var url = this.baseTradeUrl + "?" + base64encode(querystring);
-        console.log("request url: " + url);
-
-        $.ajax({
-            "url": url,
-            "method": "GET",
-            "success": function(data) {
-                console.log(url + ":" + data);
-                complete("", base64decode(data));
-            },
-            "error": function(xhr, status, err) {
-                console.log(url + ":" + status + "-" + err);
-                complete(status, err);
-            }
-        });
-    };
-
-    function getStockTypeFromStockCode(stockCode) {
-        return 0;
-    }
 }

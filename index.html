@@ -14,96 +14,101 @@
         <link rel="stylesheet" type="text/css" href="index.css" />
     </head>
     <body>
-        <div id = "content">
-            <div id="loginSection">
-                <div><img id="captcha" /></div>
-                <div><a id="huataiLink" target="_blank"></a><span id="sessionId"></span></div>
-                <form id="loginForm">
-                    <label>captcha:</label><input type="text" name="captcha" />
-                    <input type="button" name="login" value="login" /><span id="loginStatus"></span><br/>
-                </form>
-            </div>
-            <div id="tradeSection">
-                <form id="tradeForm">
-                    <label>stock code:</label><input type="text" name="stockCode" />
-                    <label id="market"></label><br/>
-                    <select name="tradeType">
-                        <option value="buy">buy with limit price</option>
-                        <option value="buyMp">buy with market price</option>
-                        <option value="sell">sell with limit price</option>
-                        <option value="sellMp">sell with market price</option>
-                    </select>
-                    <input type="button" name="trade" value="entrust" /><span id="tradeStatus"></span><br/>
-                    <label>trade price:</label><input type="text" name="tradePrice" /><br/>
-                    <label>trade amount:</label><input type="text" name="tradeAmount" /><br/>
-                    <label>refresh interval:</label><input type="number" name="timeout" min="1" max="60" value="1" /><br/>
-                </from>
-            </div>
-            <div id="dataSection">
-                <div id="latestOrder">
-                <table>
-                    <tr>
-                        <td>stock</td><td id="stockName"></td><td id="stockCode"></td>
-                    </tr>
-                    <tr>
-                        <td>sell5</td><td id="sjw5"></td><td id="ssl5"></td>
-                    </tr>
-                    <tr>
-                        <td>sell4</td><td id="sjw4"></td><td id="ssl4"></td>
-                    </tr>
-                    <tr>
-                        <td>sell3</td><td id="sjw3"></td><td id="ssl3"></td>
-                    </tr>
-                    <tr>
-                        <td>sell2</td><td id="sjw2"></td><td id="ssl2"></td>
-                    </tr>
-                    <tr>
-                        <td>sell1</td><td id="sjw1"></td><td id="ssl1"></td>
-                    </tr>
-                    <tr>
-                        <td>buy1</td><td id="bjw1"></td><td id="bsl1"></td>
-                    </tr>
-                    <tr>
-                        <td>buy2</td><td id="bjw2"></td><td id="bsl2"></td>
-                    </tr>
-                    <tr>
-                        <td>buy3</td><td id="bjw3"></td><td id="bsl3"></td>
-                    </tr>
-                    <tr>
-                        <td>buy4</td><td id="bjw4"></td><td id="bsl4"></td>
-                    </tr>
-                    <tr>
-                        <td>buy5</td><td id="bjw5"></td><td id="bsl5"></td>
-                    </tr>
-                </table>
+        <div id="container">
+            <div id = "content">
+                <div id="loginSection">
+                    <div><img id="captcha" /></div>
+                    <div><a id="huataiLink" target="_blank"></a><span id="sessionId"></span></div>
+                    <form id="loginForm">
+                        <label>captcha:</label><input type="text" name="captcha" />
+                        <input type="button" name="login" value="login" /><br/>
+                    </form>
                 </div>
-                <div id="stats">
-                <table>
-                    <tr>
-                        <td>latest deal price</td><td id="price"></td>
-                    </tr>
-                    <tr>
-                        <td>volumn</td><td id="volumn"></td>
-                    </tr>
-                    <tr>
-                        <td>yesterday close</td><td id="close"></td>
-                    </tr>
-                    <tr>
-                        <td>today opening</td><td id="opening"></td>
-                    </tr>
-                    <tr>
-                        <td>inc rate</td><td id="incRate"></td>
-                    </tr>
-                    <tr>
-                        <td>high stop</td><td id="highStop"></td>
-                    </tr>
-                    <tr>
-                        <td>low stop</td><td id="lowStop"></td>
-                    </tr>
-                </table>
+                <div id="tradeSection">
+                    <form id="tradeForm">
+                        <label>stock code:</label><input type="text" name="stockCode" />
+                        <label id="market"></label>
+                        <input type="hidden" name="market"/><br/>
+                        <select name="tradeType">
+                            <option value="buy">buy with limit price</option>
+                            <option value="buyMp">buy with market price</option>
+                            <option value="sell">sell with limit price</option>
+                            <option value="sellMp">sell with market price</option>
+                        </select>
+                        <input type="checkbox" name="undo">undo</input>
+                        <input type="button" name="trade" value="entrust" /><br/>
+                        <label>trade price:</label><input type="text" name="tradePrice" /><input type="checkbox" name="lockPrice"/>lock<input/><br/>
+                        <label>trade amount:</label><input type="text" name="tradeAmount" /><br/>
+                        <label>refresh interval:</label><input type="number" name="timeout" min="1" max="60" value="1" /><br/>
+                        <input type="hidden" name="stockData"/>
+                    </from>
+                </div>
+                <div id="dataSection">
+                    <div id="latestOrder">
+                    <table>
+                        <tr>
+                            <td>stock</td><td id="stockName"></td><td id="stockCode"></td>
+                        </tr>
+                        <tr>
+                            <td>sell5</td><td id="sjw5"></td><td id="ssl5"></td>
+                        </tr>
+                        <tr>
+                            <td>sell4</td><td id="sjw4"></td><td id="ssl4"></td>
+                        </tr>
+                        <tr>
+                            <td>sell3</td><td id="sjw3"></td><td id="ssl3"></td>
+                        </tr>
+                        <tr>
+                            <td>sell2</td><td id="sjw2"></td><td id="ssl2"></td>
+                        </tr>
+                        <tr>
+                            <td>sell1</td><td id="sjw1"></td><td id="ssl1"></td>
+                        </tr>
+                        <tr>
+                            <td>buy1</td><td id="bjw1"></td><td id="bsl1"></td>
+                        </tr>
+                        <tr>
+                            <td>buy2</td><td id="bjw2"></td><td id="bsl2"></td>
+                        </tr>
+                        <tr>
+                            <td>buy3</td><td id="bjw3"></td><td id="bsl3"></td>
+                        </tr>
+                        <tr>
+                            <td>buy4</td><td id="bjw4"></td><td id="bsl4"></td>
+                        </tr>
+                        <tr>
+                            <td>buy5</td><td id="bjw5"></td><td id="bsl5"></td>
+                        </tr>
+                    </table>
+                    </div>
+                    <div id="stats">
+                    <table>
+                        <tr>
+                            <td>latest deal price</td><td id="price"></td>
+                        </tr>
+                        <tr>
+                            <td>volumn</td><td id="volumn"></td>
+                        </tr>
+                        <tr>
+                            <td>yesterday close</td><td id="close"></td>
+                        </tr>
+                        <tr>
+                            <td>today opening</td><td id="opening"></td>
+                        </tr>
+                        <tr>
+                            <td>inc rate</td><td id="incRate"></td>
+                        </tr>
+                        <tr>
+                            <td>high stop</td><td id="highStop"></td>
+                        </tr>
+                        <tr>
+                            <td>low stop</td><td id="lowStop"></td>
+                        </tr>
+                    </table>
+                    </div>
                 </div>
             </div>
+            <div id = "footer"><span>status: </span><label id="status"></label></div>
         </div>
-        <div id = "statusBar"><span>status: </span><label id="status"></label></div>
     </body>
 </html>
