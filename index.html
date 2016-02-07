@@ -1,114 +1,271 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="zh-CN">
     <head>
         <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
         <title>HUATAI ASSIST</title>
-        <meta name="description" content="An interactive getting started guide for Brackets.">
-        <script type="text/javascript" src="jquery-1.10.2.min.js"></script>
-        <script type="text/javascript" src="optionUtility.js"></script>
-        <script type="text/javascript" src="HuataiAssist.js"></script>
-        <script type="text/javascript" src="index.js"></script>
-        <link rel="stylesheet" type="text/css" href="index.css" />
+        <meta name="description" content="hua tai assist">
+
+        <!-- Bootstrap -->
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/sticky-footer-navbar.css" rel="stylesheet">
+        <link href="css/index.css" rel="stylesheet">
+        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+          <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+          <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
     </head>
     <body>
-        <div id="container">
-            <div id = "content">
-                <div id="loginSection">
-                    <div><img id="captcha" /></div>
-                    <div><a id="huataiLink" target="_blank"></a><span id="sessionId"></span></div>
-                    <form id="loginForm">
-                        <label>captcha:</label><input type="text" name="captcha" />
-                        <input type="button" name="login" value="login" /><br/>
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="js/jquery-1.10.2.min.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="js/bootstrap.min.js"></script>
+        <!-- <script src="js/jsrender.min.js"></script> -->
+        <script type="text/javascript" src="js/optionUtility.js"></script>
+        <script type="text/javascript" src="js/HuataiAssist.js"></script>
+        <script type="text/javascript" src="js/login.js"></script>
+        <script type="text/javascript" src="js/trade.js"></script>
+        <script type="text/javascript" src="js/undo.js"></script>
+        <script type="text/javascript" src="js/data.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+        <div class="container">
+            <ul id="rootTabs" class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#login-page" id="login-tab" aria-controls="login-page" role="tab" data-toggle="tab">Login</a>
+                </li>
+                <li role="presentation">
+                    <a href="#trade-page" id="trade-tab" aria-controls="trade-page" role="tab" data-toggle="tab">Trade</a>
+                </li>
+                <li role="presentation">
+                    <a href="#undo-page" id="undo-tab" aria-controls="undo-page" role="tab" data-toggle="tab">Undo</a>
+                </li>
+                <li role="presentation">
+                    <a href="#data-page" id="data-tab" aria-controls="data-page" role="tab" data-toggle="tab">Data</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active fade in" id="login-page" aria-labelledby="login-tab">
+                    <form id="loginForm" class="form-horizontal">
+                        <div class="form-group"><a href="https://service.htsc.com.cn/service/wsyyt/hq.jsp?sub_top=hq" target="_blank">open website</a></div>
+                        <div class="form-group"><span id="sessionId"></span></div>
+                        <div class="form-group">
+                            <div class="col-sm-2">
+                                <img class="img-responsive center-block" id="captcha" alt="captcha"/>
+                            </div>
+                            <div class="col-sm-2">
+                                <label class="sr-only" for="captchaText">captcha</label>
+                                <input class="form-control" type="text" name="captcha" id="captchaText" placeholder="captcha"/>
+                            </div>
+                            <div class="col-sm-3">
+                                <button class="btn btn-default" type="button" name="login">login</button>
+                            </div>
+                        </div>
                     </form>
                 </div>
-                <div id="tradeSection">
-                    <form id="tradeForm">
-                        <label>stock code:</label><input type="text" name="stockCode" />
-                        <label id="market"></label>
-                        <input type="hidden" name="market"/><br/>
-                        <select name="tradeType">
-                            <option value="buy">buy with limit price</option>
-                            <option value="buyMp">buy with market price</option>
-                            <option value="sell">sell with limit price</option>
-                            <option value="sellMp">sell with market price</option>
-                        </select>
-                        <input type="checkbox" name="undo">undo</input>
-                        <input type="button" name="trade" value="entrust" /><br/>
-                        <label>trade price:</label><input type="text" name="tradePrice" /><input type="checkbox" name="lockPrice"/>lock<input/><br/>
-                        <label>trade amount:</label><input type="text" name="tradeAmount" /><br/>
-                        <label>refresh interval:</label><input type="number" name="timeout" min="1" max="60" value="1" /><br/>
-                        <input type="hidden" name="stockData"/>
-                    </from>
-                </div>
-                <div id="dataSection">
-                    <div id="latestOrder">
-                    <table>
-                        <tr>
-                            <td>stock</td><td id="stockName"></td><td id="stockCode"></td>
-                        </tr>
-                        <tr>
-                            <td>sell5</td><td id="sjw5"></td><td id="ssl5"></td>
-                        </tr>
-                        <tr>
-                            <td>sell4</td><td id="sjw4"></td><td id="ssl4"></td>
-                        </tr>
-                        <tr>
-                            <td>sell3</td><td id="sjw3"></td><td id="ssl3"></td>
-                        </tr>
-                        <tr>
-                            <td>sell2</td><td id="sjw2"></td><td id="ssl2"></td>
-                        </tr>
-                        <tr>
-                            <td>sell1</td><td id="sjw1"></td><td id="ssl1"></td>
-                        </tr>
-                        <tr>
-                            <td>buy1</td><td id="bjw1"></td><td id="bsl1"></td>
-                        </tr>
-                        <tr>
-                            <td>buy2</td><td id="bjw2"></td><td id="bsl2"></td>
-                        </tr>
-                        <tr>
-                            <td>buy3</td><td id="bjw3"></td><td id="bsl3"></td>
-                        </tr>
-                        <tr>
-                            <td>buy4</td><td id="bjw4"></td><td id="bsl4"></td>
-                        </tr>
-                        <tr>
-                            <td>buy5</td><td id="bjw5"></td><td id="bsl5"></td>
-                        </tr>
-                    </table>
+                <div role="tabpanel" class="tab-pane fade" id="trade-page" aria-labelledby="trade-tab">
+                    <form id="tradeForm" class="form-horizontal">
+                        <div class="form-group">
+                            <div class="col-sm-3">
+                                <label class="sr-only" for="stockCodeText">stock code</label>
+                                <div class="input-group">
+                                    <input class="form-control" type="text" name="stockCode" id="stockCodeText" placeholder="stock code"/>
+                                    <div class="input-group-addon" id="tradeMarketName"></div>
+                                </div>
+                                <input class="form-control" type="hidden" name="market"/>
+                            </div>
+                            <div class="col-sm-3">
+                                <select name="tradeType" class="form-control">
+                                    <option value="buy">buy with limit price</option>
+                                    <option value="buyMp">buy with market price</option>
+                                    <option value="sell">sell with limit price</option>
+                                    <option value="sellMp">sell with market price</option>
+                                </select>
+                            </div>
+                            <div class="checkbox col-sm-1">
+                                <label>
+                                    <input type="checkbox" name="undo"/>undo
+                                </label>
+                            </div>
+                            <div class="col-sm-3">
+                                <button class="btn btn-primary" type="button" name="trade"/>entrust</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">entrust price:</label>
+                            <div class="col-sm-4">
+                                <div class="input-group">
+                                    <div class="input-group-addon">￥</div>
+                                    <input class="form-control" type="text" name="tradePrice" placeholder="entrust price"/>
+                                </div>
+                            </div>
+                            <div class="checkbox col-sm-1">
+                                <label>
+                                    <input type="checkbox" name="lockPrice"/>lock
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">entrust amount:</label>
+                            <div class="col-sm-3">
+                                <input class="form-control" type="text" name="tradeAmount" placeholder="entrust amount"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">refresh interval:</label>
+                            <div class="col-sm-2">
+                                <input class="form-control" type="number" name="timeout" min="1" max="60" value="1" />
+                            </div>
+                        </div>
+                    </form>
+                    <div id="assetStatus">
+                        <table class="table table-bordered table-condensed table-striped" id="tableFund">
+                            <thead>
+                                <tr>
+                                    <th>币种</th>
+                                    <th>资金余额</th>
+                                    <th>股票市值</th>
+                                    <th>可用金额</th>
+                                    <th>可取金额</th>
+                                    <th>总资产（含基金）</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                        <script id="tempFund" type="text/x-render">
+                            <tr>
+                                <td>{{:money_type}}</td>
+                                <td>{{:current_balance}}</td>
+                                <td>{{:market_value}}</td>
+                                <td>{{:enable_balance}}</td>
+                                <td>{{:fetch_balance}}</td>
+                                <td>{{:asset_balance}}</td>
+                            </tr>
+                        </script>
+                        <table class="table table-bordered table-condensed table-striped" id="tableStocks">
+                            <thead>
+                                <tr>
+                                    <th>证券代码</th>
+                                    <th>证券名称</th>
+                                    <th>股票余额</th>
+                                    <th>可用余额</th>
+                                    <th>冻结数量</th>
+                                    <th>成本价</th>
+                                    <th>市价</th>
+                                    <th>盈亏</th>
+                                    <th>盈亏比例</th>
+                                    <th>市值</th>
+                                    <th>交易市场</th>
+                                    <th>股东账户</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                        <script id="tempStock" type="text/x-render">
+                            <tr>
+                                <td colspan="12">{{::}}</td>
+                            </tr>
+                        </script>
                     </div>
-                    <div id="stats">
-                    <table>
-                        <tr>
-                            <td>latest deal price</td><td id="price"></td>
-                        </tr>
-                        <tr>
-                            <td>volumn</td><td id="volumn"></td>
-                        </tr>
-                        <tr>
-                            <td>yesterday close</td><td id="close"></td>
-                        </tr>
-                        <tr>
-                            <td>today opening</td><td id="opening"></td>
-                        </tr>
-                        <tr>
-                            <td>inc rate</td><td id="incRate"></td>
-                        </tr>
-                        <tr>
-                            <td>high stop</td><td id="highStop"></td>
-                        </tr>
-                        <tr>
-                            <td>low stop</td><td id="lowStop"></td>
-                        </tr>
-                    </table>
+                </div>
+                <div role="tabpanel" class="tab-pane fade" id="undo-page" aria-labelledby="undo-tab">
+                    <div id="undoList">
+                        <table class="table table-bordered table-condensed table-striped">
+                            <thead>
+                                <th>操作</th>
+                                <th>委托时间</th>
+                                <th>证券代码</th>
+                                <th>证券名称</th>
+                                <th>交易类型</th>
+                                <th>委托数量</th>
+                                <th>成交数量</th>
+                                <th>委托价格</th>
+                                <th>备注</th>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                        <script id="tempEntrust" type="text/x-render">
+                            <tr>
+                                <td colspan="9">{{::}}</td>
+                            </tr>
+                        </script>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane fade" id="data-page" aria-labelledby="data-tab">
+                    <div id="stockStatus">
+                        <form id="stockForm" class="form-horizontal">
+                            <div class="form-group">
+                                <div class="col-sm-3">
+                                    <label class="sr-only" for="stockCodeText1">stock code</label>
+                                    <div class="input-group">
+                                        <input class="form-control" type="text" name="stockCode" id="stockCodeText1" placeholder="stock code"/>
+                                        <div class="input-group-addon" id="stockMarketName"></div>
+                                    </div>
+                                </div>
+                                <label class="col-sm-3 control-label">refresh interval:</label>
+                                <div class="col-sm-2">
+                                    <input class="form-control" type="number" name="timeout" min="1" max="60" value="1" />
+                                </div>
+                            </div>
+                        </form>
+                        <table class="table table-bordered table-condensed table-striped">
+                            <colgroup class="colgroup-cols-8">
+                                <col/>
+                                <col/>
+                                <col/>
+                                <col/>
+                                <col/>
+                                <col/>
+                                <col/>
+                                <col/>
+                            </colgroup>
+                            <tbody>
+                                <tr>
+                                    <td>stock</td><td id="stockName"></td><td id="stockCode">000000</td>
+                                    <td>current</td><td id="price"></td><td id="volumn"></td>
+                                    <td>inc rate</td><td id="incRate"></td>
+                                </tr>
+                                <tr>
+                                    <td>sell5</td><td id="sjw5"></td><td id="ssl5"></td>
+                                    <td>buy5</td><td id="bjw5"></td><td id="bsl5"></td>
+                                    <td>close</td><td id="close"></td>
+                                </tr>
+                                <tr>
+                                    <td>sell4</td><td id="sjw4"></td><td id="ssl4"></td>
+                                    <td>buy4</td><td id="bjw4"></td><td id="bsl4"></td>
+                                    <td>open</td><td id="opening"></td>
+                                </tr>
+                                <tr>
+                                    <td>sell3</td><td id="sjw3"></td><td id="ssl3"></td>
+                                    <td>buy3</td><td id="bjw3"></td><td id="bsl3"></td>
+                                    <td>high stop</td><td id="highStop"></td>
+                                </tr>
+                                <tr>
+                                    <td>sell2</td><td id="sjw2"></td><td id="ssl2"></td>
+                                    <td>buy2</td><td id="bjw2"></td><td id="bsl2"></td>
+                                    <td>low stop</td><td id="lowStop"></td>
+                                </tr>
+                                <tr>
+                                    <td>sell1</td><td id="sjw1"></td><td id="ssl1"></td>
+                                    <td>buy1</td><td id="bjw1"></td><td id="bsl1"></td>
+                                    <td></td><td></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-            <div id = "footer"><span>status: </span><label id="status"></label></div>
         </div>
+        <footer class="footer">
+            <div class="container">
+                <span>status: </span><label id="status"></label>
+            </div>
+        </footer>
     </body>
 </html>
