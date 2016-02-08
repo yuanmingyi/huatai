@@ -1,0 +1,16 @@
+body {
+	width:800px;
+}
+
+/*span#sessionId {
+	 visibility: hidden; 
+	display:none;
+}*/
+
+.colgroup-cols-8 col {
+	width: 12%;
+}
+
+form {
+	margin: 10px;
+}
