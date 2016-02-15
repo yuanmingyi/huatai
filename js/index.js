@@ -45,7 +45,7 @@ jQuery(function($) {
 
     common.updateStatus = function(err, status) {
         if (err) {
-            $("#status").text(err + ":" + status);
+            $("#status").text(err + ": " + status);
         } else {
             $("#status").text("ok");
         }
@@ -60,6 +60,7 @@ jQuery(function($) {
     tabPages["#trade-page"] = initTradePage(common, huatai, "#trade-page");
     tabPages["#undo-page"] = initUndoPage(common, huatai, "#undo-page");
     tabPages["#data-page"] = initDataPage(common, huatai, "#data-page");
+    tabPages["#auto-page"] = initAutoPage(common, huatai, "#auto-page");
 
     $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
         var panelId = $(e.target).attr("href");

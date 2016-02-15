@@ -24,6 +24,8 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
     var baseTradeUrl = "https://tradegw.htsc.com.cn/";
     var baseHqUrl = "http://hq.htsc.com.cn/cssweb";
 
+    // $.getScript(base64Url);
+
     this.getBaseUrl = function() {
         return baseUrl;
     }
@@ -40,14 +42,13 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
         return jyUrl;
     }
 
-    function base64Decode(str) {
-        var ret = base64decode(str);
-        return ret.replace(/(\"cssweb_msg\":\"\[[0-9]+\])[^\"]+\"/, "$1\"");
-    }
+    // function base64Decode(str) {
+    //     var ret = base64decode(str);
+    //     return ret.replace(/(\"cssweb_msg\":\"\[[0-9]+\])[^\"]+\"/, "$1\"");
+    // }
 
     this.init = function(sessionId) {
         this.sessionId = sessionId;
-        $.getScript(base64Url);
     }
 
     this.login = function(vcode, callback) {
@@ -128,7 +129,7 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //
     var pattern = /<script\s+.*?>\s*var data ?= ?"(.*?)";\s*<\/script>/im;
     this.loadUserData = function(complete) {
-        that = this;
+        var that = this;
         $.ajax({
             "url": biUrl,
             "method": "GET",
@@ -138,10 +139,12 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             "success": function(data) {
                 console.log(biUrl + ":" + data);
                 // search user data in response html
-                var result = data.match(pattern);
+                var result = data.match(pattern), text;
                 try {
-                    var data = result[1];
-                    userdata = JSON.parse(base64decode(data));
+                    data = result[1];
+                    text = Base64.decode64(data);
+                    //text = text.replace(/(PCN|CPU|PI)\[[^\]]*\]/g, '$1[unknown]');
+                    userdata = JSON.parse(text);
                 } catch (err) {
                     console.warn("load user data failed: " + err);
                     complete("error", "load user data failed!");
@@ -161,20 +164,21 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //
 
     this.sendTradeReq = function(paramMap, reqType, funcId, exType, complete) {
+        var stockAccount = "", querystring, url, t, key, accounts;
         if (!userdata) {
             complete("error", "login first!");
             return;
         }
 
-        var stockAccount = "";
-        for(var t in userdata["item"]) {
-            if (t["exchange_type"] == exType) {
-                stockAccount = t["stock_account"];
+        accounts = userdata["item"];
+        for(t in accounts) {
+            if (accounts[t]["exchange_type"] === String(exType)) {
+                stockAccount = accounts[t]["stock_account"];
                 break;
             }
         };
 
-        var querystring = "uid=" + userdata["uid"]
+        querystring = "uid=" + userdata["uid"]
             + "&cssweb_type=" + reqType
             + "&version=1&custid=" + userdata["account_content"]
             + "&op_branch_no=" + userdata["branch_no"]
@@ -184,16 +188,16 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             + "&fund_account=" + userdata["fund_account"]
             + "&password=" + userdata["trdpwd"]
             + "&identity_type=&exchange_type=" + exType
-            + "&stock_account=" + stockAccount
-            + "&ram=" + Math.random();
+            + "&stock_account=" + stockAccount;
 
-        for (var key in paramMap) {
+        for (key in paramMap) {
             if (paramMap.hasOwnProperty(key)) {
                 querystring += "&" + key + "=" + paramMap[key];
             }
         }
 
-        var url = baseTradeUrl + "?" + base64encode(querystring);
+        querystring = querystring + "&ram=" + Math.random();
+        url = baseTradeUrl + "?" + Base64.encode64(querystring);
         //console.log("request url: " + url);
 
         $.ajax({
@@ -201,11 +205,16 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
             "method": "GET",
             "success": function(data) {
                 //console.log(url + ":" + data);
-                data = JSON.parse(base64Decode(data));
-                if (data["cssweb_code"] !== "success") {
-                    complete(data["cssweb_code"], data["cssweb_msg"]);
-                } else {
-                    complete("", data["item"]);
+                try {
+                    data = Base64.decode64(data);
+                    data = JSON.parse(data);
+                    if (data["cssweb_code"] !== "success") {
+                        complete(data["cssweb_code"], data["cssweb_msg"]);
+                    } else {
+                        complete("", data["item"]);
+                    }
+                } catch(err) {
+                    complete("error", data);
                 }
             },
             "error": function(xhr, status, err) {

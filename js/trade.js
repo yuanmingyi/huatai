@@ -30,7 +30,7 @@ function initTradePage(common, huatai, html) {
             return;
         }
         huatai[func]($(formTrade["market"]).val(), $(formTrade["stockCode"]).val(), $(formTrade["tradeAmount"]).val(), $(formTrade["tradePrice"]).val(), function(err, data) {
-            alert(data);
+            //alert(data);
             common.updateStatus(err, data);
         }, formTrade["undo"].checked);
     }).prop("disabled", true);

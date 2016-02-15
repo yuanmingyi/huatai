@@ -25,12 +25,14 @@
         <!-- Include all compiled plugins (below), or include individual files as needed -->
         <script src="js/bootstrap.min.js"></script>
         <!-- <script src="js/jsrender.min.js"></script> -->
+        <script type="text/javascript" src="js/base64.js"></script>
         <script type="text/javascript" src="js/optionUtility.js"></script>
         <script type="text/javascript" src="js/HuataiAssist.js"></script>
         <script type="text/javascript" src="js/login.js"></script>
         <script type="text/javascript" src="js/trade.js"></script>
         <script type="text/javascript" src="js/undo.js"></script>
         <script type="text/javascript" src="js/data.js"></script>
+        <script type="text/javascript" src="js/auto.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
         <div class="container">
             <ul id="rootTabs" class="nav nav-tabs" role="tablist">
@@ -45,6 +47,9 @@
                 </li>
                 <li role="presentation">
                     <a href="#data-page" id="data-tab" aria-controls="data-page" role="tab" data-toggle="tab">Data</a>
+                </li>
+                <li role="presentation">
+                    <a href="#auto-page" id="auto-tab" aria-controls="auto-page" role="tab" data-toggle="tab">Auto</a>`
                 </li>
             </ul>
             <div class="tab-content">
@@ -175,7 +180,7 @@
                 </div>
                 <div role="tabpanel" class="tab-pane fade" id="undo-page" aria-labelledby="undo-tab">
                     <div id="undoList">
-                        <table class="table table-bordered table-condensed table-striped">
+                        <table class="table table-bordered table-condensed table-striped" id="tableUndo">
                             <thead>
                                 <th>操作</th>
                                 <th>委托时间</th>
@@ -190,7 +195,7 @@
                             <tbody>
                             </tbody>
                         </table>
-                        <script id="tempEntrust" type="text/x-render">
+                        <script id="tempUndo" type="text/x-render">
                             <tr>
                                 <td colspan="9">{{::}}</td>
                             </tr>
@@ -260,6 +265,9 @@
                         </table>
                     </div>
                 </div>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="auto-page" aria-labelledby="auto-tab">
+                <form id="autoForm" class="form-horizontal"></form>
             </div>
         </div>
         <footer class="footer">

@@ -6,8 +6,9 @@ function initLoginPage(common, huatai, html) {
             "url":huatai.getBaseUrl(),
             "name":"JSESSIONID"
         }, function(cookie) {
-            $html.find("#sessionId").text(cookie.value);
-            huatai.init(cookie.value);
+            var sessionId = cookie && cookie.value;
+            $html.find("#sessionId").text(sessionId);
+            huatai.init(sessionId);
             $html.find("#captcha").attr("src", huatai.getCaptchaUrl());
             huatai.loadUserData(function(err, data) {
                 if (!err) {
