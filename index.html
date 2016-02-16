@@ -49,7 +49,7 @@
                     <a href="#data-page" id="data-tab" aria-controls="data-page" role="tab" data-toggle="tab">Data</a>
                 </li>
                 <li role="presentation">
-                    <a href="#auto-page" id="auto-tab" aria-controls="auto-page" role="tab" data-toggle="tab">Auto</a>`
+                    <a href="#auto-page" id="auto-tab" aria-controls="auto-page" role="tab" data-toggle="tab">Auto</a>
                 </li>
             </ul>
             <div class="tab-content">
@@ -75,10 +75,10 @@
                     <form id="tradeForm" class="form-horizontal">
                         <div class="form-group">
                             <div class="col-sm-3">
-                                <label class="sr-only" for="stockCodeText">stock code</label>
+                                <label class="sr-only" for="trade-stock-code">stock code</label>
                                 <div class="input-group">
-                                    <input class="form-control" type="text" name="stockCode" id="stockCodeText" placeholder="stock code"/>
-                                    <div class="input-group-addon" id="tradeMarketName"></div>
+                                    <input class="form-control" type="text" name="stockCode" id="trade-stock-code" placeholder="stock code"/>
+                                    <div class="input-group-addon" id="trade-market"></div>
                                 </div>
                                 <input class="form-control" type="hidden" name="market"/>
                             </div>
@@ -96,7 +96,7 @@
                                 </label>
                             </div>
                             <div class="col-sm-3">
-                                <button class="btn btn-primary" type="button" name="trade"/>entrust</button>
+                                <button class="btn btn-primary" type="button" name="trade">entrust</button>
                             </div>
                         </div>
                         <div class="form-group">
@@ -182,14 +182,18 @@
                     <div id="undoList">
                         <table class="table table-bordered table-condensed table-striped" id="tableUndo">
                             <thead>
+                                <th></th>
                                 <th>操作</th>
                                 <th>委托时间</th>
+                                <th>委托状态</th>
                                 <th>证券代码</th>
                                 <th>证券名称</th>
                                 <th>交易类型</th>
                                 <th>委托数量</th>
                                 <th>成交数量</th>
                                 <th>委托价格</th>
+                                <th>成交价格</th>
+                                <th>证券市场</th>
                                 <th>备注</th>
                             </thead>
                             <tbody>
@@ -197,7 +201,19 @@
                         </table>
                         <script id="tempUndo" type="text/x-render">
                             <tr>
-                                <td colspan="9">{{::}}</td>
+                                <td><a class="btn" data-status="{{:entrust_status}}" id="entrust-no-{{:entrust_no}}">撤销</a></td>
+                                <td>{{:bs_name}}</td>
+                                <td>{{:entrust_time}}</td>
+                                <td>{{:status_name}}</td>
+                                <td>{{:stock_code}}</td>
+                                <td>{{:stock_name}}</td>
+                                <td>{{:prop_name}}</td>
+                                <td>{{:entrust_amount}}</td>
+                                <td>{{:business_amount}}</td>
+                                <td>{{:entrust_price}}</td>
+                                <td>{{:business_price}}</td>
+                                <td>{{:exchange_name}}</td>
+                                <td><span class="td-entrust-no">{{:entrust_no}}</span>-<span class="td-entrust-status">{{:entrust_status}}</span></td>
                             </tr>
                         </script>
                     </div>
@@ -207,10 +223,10 @@
                         <form id="stockForm" class="form-horizontal">
                             <div class="form-group">
                                 <div class="col-sm-3">
-                                    <label class="sr-only" for="stockCodeText1">stock code</label>
+                                    <label class="sr-only" for="data-stock-code">stock code</label>
                                     <div class="input-group">
-                                        <input class="form-control" type="text" name="stockCode" id="stockCodeText1" placeholder="stock code"/>
-                                        <div class="input-group-addon" id="stockMarketName"></div>
+                                        <input class="form-control" type="text" name="stockCode" id="data-stock-code" placeholder="stock code"/>
+                                        <div class="input-group-addon" id="data-market"></div>
                                     </div>
                                 </div>
                                 <label class="col-sm-3 control-label">refresh interval:</label>
@@ -264,10 +280,31 @@
                             </tbody>
                         </table>
                     </div>
+                </div> 
+                <div role="tabpanel" class="tab-pane fade" id="auto-page" aria-labelledby="auto-tab">
+                    <form id="autoForm" class="form-horizontal">
+                        <div class="form-group">
+                            <div class="col-sm-3">
+                                <label class="sr-only" for="auto-stock-code">stock code:</label>
+                                <div class="input-group">
+                                    <input class="form-control" type="text" name="stockCode" id="auto-stock-code" placeholder="stock code"/>
+                                    <div class="input-group-addon" id="auto-market"></div>
+                                </div>
+                            </div>
+                            <label class="col-sm-1 control-label">amount:</label>
+                            <div class="col-sm-3">
+                                <input class="form-control" type="text" name="stockAmount" placeholder="amount"/>
+                            </div>
+                            <label class="col-sm-1 control-label">freq:</label>
+                            <div class="col-sm-2">
+                                <input class="form-control" type="number" name="timeout" min="1" max="60" value="1" />
+                            </div>
+                            <div class="col-sm-2">
+                                <button class="btn btn-primary" type="button" name="toggle">start</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-            </div>
-            <div role="tabpanel" class="tab-pane fade" id="auto-page" aria-labelledby="auto-tab">
-                <form id="autoForm" class="form-horizontal"></form>
             </div>
         </div>
         <footer class="footer">

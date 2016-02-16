@@ -305,6 +305,24 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //
 // get cancel list
 //
+// bs_name: "买入"
+// business_amount: "0"
+// business_price: "0"
+// entrust_amount: "100.00"
+// entrust_bs: "1"
+// entrust_no: "16389"
+// entrust_price: "0.620"
+// entrust_prop: "0"
+// entrust_status: "2"
+// entrust_time: "133739"
+// exchange_name: "深圳Ａ"
+// exchange_type: "2"
+// prop_name: "买卖"
+// status_name: "已报"
+// stock_account: "0191042364"
+// stock_code: "159940"
+// stock_name: "全指金融"
+//
     this.getWithdrawList = function(complete) {
         var paramMap = {
             "stock_code": "",

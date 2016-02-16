@@ -71,7 +71,7 @@ function initTradePage(common, huatai, html) {
     };
 
     function updateStockStatus(data) {
-        $html.find("#tradeMarketName").text(common.market[data.market]);
+        $html.find("#trade-market").text(common.market[data.market]);
         $(formTrade["market"]).val(data.market);
         if (!formTrade["lockPrice"].checked) {
             $(formTrade["tradePrice"]).val(data.zjcj);

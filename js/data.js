@@ -52,7 +52,7 @@ function initDataPage(common, huatai, html) {
         $("#volumn").text(data.cjsl);
         $("#highStop").text(data.zt);
         $("#lowStop").text(data.dt);
-        $("#stockMarketName").text(common.market[data.market]);
+        $("#data-market").text(common.market[data.market]);
     };
 
     tabPage.onShow = function() {
