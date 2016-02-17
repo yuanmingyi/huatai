@@ -28,6 +28,7 @@
         <script type="text/javascript" src="js/base64.js"></script>
         <script type="text/javascript" src="js/optionUtility.js"></script>
         <script type="text/javascript" src="js/HuataiAssist.js"></script>
+        <script type="text/javascript" src="js/logger.js"></script>
         <script type="text/javascript" src="js/login.js"></script>
         <script type="text/javascript" src="js/trade.js"></script>
         <script type="text/javascript" src="js/undo.js"></script>
@@ -116,7 +117,10 @@
                         <div class="form-group">
                             <label class="col-sm-3 control-label">entrust amount:</label>
                             <div class="col-sm-3">
-                                <input class="form-control" type="text" name="tradeAmount" placeholder="entrust amount"/>
+                                <div class="input-group">
+                                    <input class="form-control" type="text" name="tradeAmount" placeholder="entrust amount"/>
+                                    <div class="input-group-addon">00</div>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
@@ -158,7 +162,6 @@
                                     <th>证券名称</th>
                                     <th>股票余额</th>
                                     <th>可用余额</th>
-                                    <th>冻结数量</th>
                                     <th>成本价</th>
                                     <th>市价</th>
                                     <th>盈亏</th>
@@ -173,7 +176,17 @@
                         </table>
                         <script id="tempStock" type="text/x-render">
                             <tr>
-                                <td colspan="12">{{::}}</td>
+                                <td>{{:stock_code}}</td>
+                                <td>{{:stock_name}}</td>
+                                <td>{{:current_amount}}</td>
+                                <td>{{:enable_amount}}</td>
+                                <td>{{:cost_price}}</td>
+                                <td>{{:last_price}}</td>
+                                <td>{{:income_balance}}</td>
+                                <td>{{:income_balance_ratio}}</td>
+                                <td>{{:market_value}}</td>
+                                <td>{{:exchange_name}}</td>
+                                <td>{{:stock_account}}</td>
                             </tr>
                         </script>
                     </div>
@@ -291,9 +304,12 @@
                                     <div class="input-group-addon" id="auto-market"></div>
                                 </div>
                             </div>
-                            <label class="col-sm-1 control-label">amount:</label>
                             <div class="col-sm-3">
-                                <input class="form-control" type="text" name="stockAmount" placeholder="amount"/>
+                                <label class="sr-only" for="auto-stock-name">amount:</label>
+                                <div class="input-group">
+                                    <input class="form-control" type="text" name="stockAmount" id="auto-stock-name" placeholder="amount"/>
+                                    <div class="input-group-addon">00</div>
+                                </div>
                             </div>
                             <label class="col-sm-1 control-label">freq:</label>
                             <div class="col-sm-2">
@@ -301,6 +317,14 @@
                             </div>
                             <div class="col-sm-2">
                                 <button class="btn btn-primary" type="button" name="toggle">start</button>
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <label class="col-md-3">auto scroll: <input type="checkbox" name="autoscroll"/></label>
+                                <button class="btn btn-default-sm" type="button" name="clear">clear</button>
+                            </div>
+                            <div class="panel-body" id="strategy-log">
                             </div>
                         </div>
                     </form>

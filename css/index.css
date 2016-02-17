@@ -14,3 +14,27 @@ body {
 form {
 	margin: 10px;
 }
+
+.panel {
+	width: 100%;
+}
+
+.panel-body {
+	background-color: #333;
+	height: 350px;
+	overflow-y: auto;
+	word-wrap: break-word;
+}
+
+.panel-body>span.info {
+	color: #eee;
+}
+
+.panel-body>span.warn {
+	color: #ff0;
+}
+
+.panel-body>span.error {
+	color: #f00;
+	font-weight: bold;
+}

@@ -382,14 +382,33 @@ function HuataiAssist(userId, pwd, trdpwd, hdd, ip, mac) {
 //
 // get owned stock info
 //
+// av_buy_price: "0"
+// av_income_balance: "0"
+// cost_price: "0.693"
+// current_amount: "100.00"
+// enable_amount: "0"
+// exchange_name: "深圳Ａ"
+// exchange_type: "2"
+// hand_flag: "0"
+// income_balance: "-0.20"
+// income_balance_ratio: "-0.29"
+// keep_cost_price: "0.693"
+// last_price: "0.692"
+// market_value: "69.20"
+// stock_account: "0191042364"
+// stock_code: "159940"
+// stock_name: "全指金融"
+//
     this.getOwnedStockInfo = function(complete) {
         var paramMap = {
-            "fund_company": "",
-            "fund_code": "",
-            "query_mode": 0
+            "stock_code": "",
+            "query_direction": "",
+            "query_mode": 0,
+            "request_num": 100,
+            "position_str": ""
         };
 
-        return this.sendTradeReq(paramMap, "FUND_GET_JJSZ", "7411", "", complete);
+        return this.sendTradeReq(paramMap, "GET_STOCK_POSITION", "403", "", complete);
     }
 
 // helper function

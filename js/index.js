@@ -44,10 +44,11 @@ jQuery(function($) {
     };
 
     common.updateStatus = function(err, status) {
+        var date = new Date().toTimeString();
         if (err) {
-            $("#status").text(err + ": " + status);
+            $("#status").text("[" + date + "]" + err + ": " + status);
         } else {
-            $("#status").text("ok");
+            $("#status").text("[" + date + "] ok");
         }
     };
 
