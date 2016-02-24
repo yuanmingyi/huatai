@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block body %}
+    <script src="{{ url_for('static/js', filename='undo.js') }}" type=text/javascript></script>
+    <div id="undo-list">
+        <table class="table table-bordered table-condensed table-striped" id="table-undo">
+            <thead>
+                <th></th>
+                <th>操作</th>
+                <th>委托时间</th>
+                <th>委托状态</th>
+                <th>证券代码</th>
+                <th>证券名称</th>
+                <th>交易类型</th>
+                <th>委托数量</th>
+                <th>成交数量</th>
+                <th>委托价格</th>
+                <th>成交价格</th>
+                <th>证券市场</th>
+                <th>备注</th>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <script id="temp-undo" type="text/x-render">
+            <tr>
+                <td><a class="btn" data-status="{{:entrust_status}}" id="entrust-no-{{:entrust_no}}">撤销</a></td>
+                <td>{{:bs_name}}</td>
+                <td>{{:entrust_time}}</td>
+                <td>{{:status_name}}</td>
+                <td>{{:stock_code}}</td>
+                <td>{{:stock_name}}</td>
+                <td>{{:prop_name}}</td>
+                <td>{{:entrust_amount}}</td>
+                <td>{{:business_amount}}</td>
+                <td>{{:entrust_price}}</td>
+                <td>{{:business_price}}</td>
+                <td>{{:exchange_name}}</td>
+                <td><span class="td-entrust-no">{{:entrust_no}}</span>-<span class="td-entrust-status">{{:entrust_status}}</span></td>
+            </tr>
+        </script>
+    </div>
+{% endblock %}

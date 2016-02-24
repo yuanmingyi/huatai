@@ -1,13 +1,12 @@
-function initDataPage(common, huatai, html) {
-	var $html = $(html), formStock = $("#stockForm")[0],
-        stockData = null, refresh = false, tabPage = {};
+jQuery(function($) {
+	var formStock = $("#stock-form")[0], stockData = null;
 
     function setStockData(data) {
         stockData = data;
         updateStockStatus(data);
     }
 
-    $(formStock["stockCode"]).on("input", function() {
+    $(formStock["stock-code"]).on("input", function() {
         var stockCode = $(this);
         if (stockCode.val().length == 6) {
             huatai.queryStock(stockCode.val(), function(err, data) {
@@ -20,7 +19,7 @@ function initDataPage(common, huatai, html) {
     });
 
     function startRefresh() {
-        var code = $(formStock["stockCode"]).val();
+        var code = $(formStock["stock-code"]).val();
         var timeout = $(formStock["timeout"]).val() * 1000;
         if (code.length === 6) {
             huatai.queryStock(code, function(err, data) {
@@ -31,14 +30,14 @@ function initDataPage(common, huatai, html) {
             });
         }
 
-        if (refresh && timeout > 0) {
+        if (timeout > 0) {
             setTimeout(startRefresh, timeout);
         }
     };
 
     function updateStockStatus(data) {
-        $("#stockName").text(data.zqjc);
-        $("#stockCode").text(data.zqdm);
+        $("#stock-name").text(data.zqjc);
+        $("#stock-code").text(data.zqdm);
         for (var i = 1; i <= 5; i++) {
             $("#sjw" + i).text(data["sjw" + i]);
             $("#ssl" + i).text(data["ssl" + i]);
@@ -48,21 +47,12 @@ function initDataPage(common, huatai, html) {
         $("#close").text(data.zrsp);
         $("#opening").text(data.jrkp);
         $("#price").text(data.zjcj);
-        $("#incRate").text(data.zf * 100 + "%");
+        $("#inc-rate").text(data.zf * 100 + "%");
         $("#volumn").text(data.cjsl);
-        $("#highStop").text(data.zt);
-        $("#lowStop").text(data.dt);
+        $("#high-stop").text(data.zt);
+        $("#low-stop").text(data.dt);
         $("#data-market").text(common.market[data.market]);
     };
 
-    tabPage.onShow = function() {
-        refresh = true;
-        startRefresh();
-    };
-
-    tabPage.onHide = function() {
-        refresh = false;
-    };
-
-    return tabPage;
-}
+    startRefresh();
+});

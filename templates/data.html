@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block body %}
+    <script src="{{ url_for('static/js', filename='data.js') }}" type=text/javascript></script>
+    <div id="stock-status">
+        <form id="stock-form" class="form-horizontal">
+            <div class="form-group">
+                <div class="col-sm-3">
+                    <label class="sr-only" for="data-stock-code">stock code</label>
+                    <div class="input-group">
+                        <input class="form-control" type="text" name="stock-code" id="data-stock-code" placeholder="stock code"/>
+                        <div class="input-group-addon" id="data-market"></div>
+                    </div>
+                </div>
+                <label class="col-sm-3 control-label">refresh interval:</label>
+                <div class="col-sm-2">
+                    <input class="form-control" type="number" name="timeout" min="1" max="60" value="1" />
+                </div>
+            </div>
+        </form>
+        <table class="table table-bordered table-condensed table-striped">
+            <colgroup class="colgroup-cols-8">
+                <col/>
+                <col/>
+                <col/>
+                <col/>
+                <col/>
+                <col/>
+                <col/>
+                <col/>
+            </colgroup>
+            <tbody>
+                <tr>
+                    <td>stock</td><td id="stock-name"></td><td id="stock-code">000000</td>
+                    <td>current</td><td id="price"></td><td id="volumn"></td>
+                    <td>inc rate</td><td id="inc-rate"></td>
+                </tr>
+                <tr>
+                    <td>sell5</td><td id="sjw5"></td><td id="ssl5"></td>
+                    <td>buy5</td><td id="bjw5"></td><td id="bsl5"></td>
+                    <td>close</td><td id="close"></td>
+                </tr>
+                <tr>
+                    <td>sell4</td><td id="sjw4"></td><td id="ssl4"></td>
+                    <td>buy4</td><td id="bjw4"></td><td id="bsl4"></td>
+                    <td>open</td><td id="opening"></td>
+                </tr>
+                <tr>
+                    <td>sell3</td><td id="sjw3"></td><td id="ssl3"></td>
+                    <td>buy3</td><td id="bjw3"></td><td id="bsl3"></td>
+                    <td>high stop</td><td id="high-stop"></td>
+                </tr>
+                <tr>
+                    <td>sell2</td><td id="sjw2"></td><td id="ssl2"></td>
+                    <td>buy2</td><td id="bjw2"></td><td id="bsl2"></td>
+                    <td>low stop</td><td id="low-stop"></td>
+                </tr>
+                <tr>
+                    <td>sell1</td><td id="sjw1"></td><td id="ssl1"></td>
+                    <td>buy1</td><td id="bjw1"></td><td id="bsl1"></td>
+                    <td></td><td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

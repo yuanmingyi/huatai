@@ -1,0 +1,121 @@
+{% extends "layout.html" %}
+{% block body %}
+    <script src="{{ url_for('static/js', filename='trade.js') }}" type=text/javascript></script>
+    <form id="entrust-form" class="form-horizontal">
+        <div class="form-group">
+            <div class="col-sm-3">
+                <label class="sr-only" for="entrust-stock-code">stock code</label>
+                <div class="input-group">
+                    <input class="form-control" type="text" name="stock-code" id="entrust-stock-code" placeholder="stock code"/>
+                    <div class="input-group-addon" id="entrust-market"></div>
+                </div>
+                <input class="form-control" type="hidden" name="market"/>
+            </div>
+            <div class="col-sm-3">
+                <select name="entrust-type" class="form-control">
+                    <option value="buy">buy with limit price</option>
+                    <option value="buyMp">buy with market price</option>
+                    <option value="sell">sell with limit price</option>
+                    <option value="sellMp">sell with market price</option>
+                </select>
+            </div>
+            <div class="checkbox col-sm-1">
+                <label>
+                    <input type="checkbox" name="undo"/>undo
+                </label>
+            </div>
+            <div class="col-sm-3">
+                <button class="btn btn-primary" type="button" name="entrust">entrust</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">entrust price:</label>
+            <div class="col-sm-4">
+                <div class="input-group">
+                    <div class="input-group-addon">￥</div>
+                    <input class="form-control" type="text" name="entrust-price" placeholder="entrust price"/>
+                </div>
+            </div>
+            <div class="checkbox col-sm-1">
+                <label>
+                    <input type="checkbox" name="lock-price"/>lock
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">entrust amount:</label>
+            <div class="col-sm-3">
+                <div class="input-group">
+                    <input class="form-control" type="text" name="entrust-amount" placeholder="entrust amount"/>
+                    <div class="input-group-addon">00</div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">refresh interval:</label>
+            <div class="col-sm-2">
+                <input class="form-control" type="number" name="timeout" min="1" max="60" value="1" />
+            </div>
+        </div>
+    </form>
+    <div id="asset-status">
+        <table class="table table-bordered table-condensed table-striped" id="table-fund">
+            <thead>
+                <tr>
+                    <th>币种</th>
+                    <th>资金余额</th>
+                    <th>股票市值</th>
+                    <th>可用金额</th>
+                    <th>可取金额</th>
+                    <th>总资产（含基金）</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <script id="temp-fund" type="text/x-render">
+            <tr>
+                <td>{{:money_type}}</td>
+                <td>{{:current_balance}}</td>
+                <td>{{:market_value}}</td>
+                <td>{{:enable_balance}}</td>
+                <td>{{:fetch_balance}}</td>
+                <td>{{:asset_balance}}</td>
+            </tr>
+        </script>
+        <table class="table table-bordered table-condensed table-striped" id="table-stocks">
+            <thead>
+                <tr>
+                    <th>证券代码</th>
+                    <th>证券名称</th>
+                    <th>股票余额</th>
+                    <th>可用余额</th>
+                    <th>成本价</th>
+                    <th>市价</th>
+                    <th>盈亏</th>
+                    <th>盈亏比例</th>
+                    <th>市值</th>
+                    <th>交易市场</th>
+                    <th>股东账户</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <script id="temp-stock" type="text/x-render">
+            <tr>
+                <td>{{:stock_code}}</td>
+                <td>{{:stock_name}}</td>
+                <td>{{:current_amount}}</td>
+                <td>{{:enable_amount}}</td>
+                <td>{{:cost_price}}</td>
+                <td>{{:last_price}}</td>
+                <td>{{:income_balance}}</td>
+                <td>{{:income_balance_ratio}}</td>
+                <td>{{:market_value}}</td>
+                <td>{{:exchange_name}}</td>
+                <td>{{:stock_account}}</td>
+            </tr>
+        </script>
+    </div>
+{% endblock %}

@@ -42,6 +42,12 @@ function loggerBuilder(domOrSelector) {
 		},
 		"error": function(text) {
 			log("error", text);
+		},
+		"append": function(text) {
+			con.html(con.html() + text);
+			if (autoScroll) {
+				con.scrollTop(con[0].scrollHeight);
+			}
 		}
 	}
 }
