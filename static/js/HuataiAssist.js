@@ -3,17 +3,11 @@
  */
 
 function HuataiAssist() {
-    this.userId = userId;
-    this.pwd = pwd;
-    this.trdpwd = trdpwd;
-    this.hdd = hdd;
-    this.ip = ip;
-    this.mac = mac;
-
-    var loginUrl = "/huatai/login";
-    var captchaUrl = "/huatai/captcha";
-    var baseTradeUrl = "/huatai/trade/";
-    var baseHqUrl = "/huatai/hq/";
+    var loginUrl = "/api/login";
+    var captchaUrl = "/api/captcha";
+    var baseTradeUrl = "/api/trade/";
+    var baseHqUrl = "/api/hq/";
+    var baseAutoUrl = "/api/auto/";
 
     this.getCaptchaUrl = function() {
         return captchaUrl + "?ran=" + Math.random();
@@ -30,20 +24,30 @@ function HuataiAssist() {
         });
     }
 
+    this.getLoginStatus = function(callback) {
+        $.ajax({
+            "url": loginUrl,
+            "data": "",
+            "method": "GET",
+            "success": callback
+        });   
+    }
 //
 //  ajax methods
 //
 
-    this.sendTradeReq = function(paramMap, reqType, complete) {
-        var querystring = "?", url;
+    this.sendTradeReq = function(paramMap, reqType, funcId, exType, complete) {
+        var querystring = "?cssweb_type=" + reqType
+            + "&function_id=" + funcId
+            + "&exchange_type=" + exType, url;
 
         for (key in paramMap) {
             if (paramMap.hasOwnProperty(key)) {
-                querystring += key + "=" + paramMap[key] + "&";
+                querystring += "&" + key + "=" + paramMap[key];
             }
         }
 
-        url = baseTradeUrl + reqType + querystring.slice(0, -1);
+        url = baseTradeUrl + querystring;
         //console.log("request url: " + url);
 
         $.ajax({
@@ -77,10 +81,11 @@ function HuataiAssist() {
             "stock_code": stockCode,
             "entrust_amount": entrustAmount,
             "entrust_price": entrustPrice,
-            "market": market
+            "entrust_prop": 0,
+            "entrust_bs": 1
         };
 
-        return this.sendTradeReq(paramMap, "STOCK_BUY", complete);
+        return this.sendTradeReq(paramMap, "STOCK_BUY", "302", market, complete);
     }
 
 // 
@@ -93,10 +98,10 @@ function HuataiAssist() {
             "entrust_amount": entrustAmount,
             "entrust_price": entrustPrice,
             "entrust_prop": entrustProp,
-            "market": market
+            "entrust_bs": 1
         };
 
-        return this.sendTradeReq(paramMap, "STOCK_BUY_MP", complete);
+        return this.sendTradeReq(paramMap, "STOCK_BUY_MP", "302", market, complete);
     }
 
 //
@@ -107,10 +112,11 @@ function HuataiAssist() {
             "stock_code": stockCode,
             "entrust_amount": entrustAmount,
             "entrust_price": entrustPrice,
-            "market": market
+            "entrust_prop": 0,
+            "entrust_bs": 2
         };
 
-        return this.sendTradeReq(paramMap, "STOCK_SALE", complete);
+        return this.sendTradeReq(paramMap, "STOCK_SALE", "302", market, complete);
     }
 
 //
@@ -123,10 +129,14 @@ function HuataiAssist() {
             "entrust_amount": entrustAmount,
             "entrust_price": entrustPrice,
             "entrust_prop": entrustProp,
-            "market": market
+            "entrust_bs": 2
         };
 
-        return this.sendTradeReq(paramMap, "STOCK_SALE_MP", complete);
+        return this.sendTradeReq(paramMap, "STOCK_SALE_MP", "302", market, complete);
+    }
+
+    function marketToExchange(market) {
+        return (market === 1 ? "sh" : "sz");
     }
 
 //
@@ -134,10 +144,11 @@ function HuataiAssist() {
 //
     this.cancelEntrust = function(entrustNo, complete) {
         var paramMap = {
+            "batch_flag": 0,
             "entrust_no": entrustNo
         };
 
-        return this.sendTradeReq(paramMap, "STOCK_CANCEL", complete);
+        return this.sendTradeReq(paramMap, "STOCK_CANCEL", "304", "", complete);
     }
 
 //
@@ -162,28 +173,59 @@ function HuataiAssist() {
 // stock_name: "全指金融"
 //
     this.getWithdrawList = function(complete) {
-        return this.sendTradeReq({}, "GET_CANCEL_LIST", complete);
+        var paramMap = {
+            "stock_code": "",
+            "locate_entrust_no": "",
+            "query_direction": "",
+            "sort_direction": 0,
+            "request_num": 100,
+            "position_str": ""
+        };
+
+        return this.sendTradeReq(paramMap, "GET_CANCEL_LIST", "401", "", complete);
     }
 
 //
 // get entrust list
 //
     this.getEntrustList = function(complete) {
-        return this.sendTradeReq({}, "GET_TODAY_ENTRUST", complete);
+        var paramMap = {
+            "stock_code": "",
+            "locate_entrust_no": "",
+            "query_direction": "",
+            "sort_direction": 0,
+            "request_num": 100,
+            "position_str": ""
+        };
+
+        return this.sendTradeReq(paramMap, "GET_TODAY_ENTRUST", "401", "", complete);
     }
 
 //
 // get trade list
 //
     this.getTodayTradeList = function(complete) {
-        return this.sendTradeReq({}, "GET_TODAY_TRADE", complete);
+        var paramMap = {
+            "stock_code": "",
+            "serial_no": "",
+            "query_direction": "",
+            "request_num": 100,
+            "query_mode": 0,
+            "position_str": ""
+        };
+
+        return this.sendTradeReq(paramMap, "GET_TODAY_TRADE", "402", "", complete);
     }
 
 //
 // get money info
 //
     this.getAssetInfo = function(complete) {
-        return this.sendTradeReq({}, "GET_FUNDS", complete);
+        var paramMap = {
+            "money_type": ""
+        };
+
+        return this.sendTradeReq(paramMap, "GET_FUNDS", "405", "", complete);
     }
 
 //
@@ -207,7 +249,15 @@ function HuataiAssist() {
 // stock_name: "全指金融"
 //
     this.getOwnedStockInfo = function(complete) {
-        return this.sendTradeReq(paramMap, "GET_STOCK_POSITION", complete);
+        var paramMap = {
+            "stock_code": "",
+            "query_direction": "",
+            "query_mode": 0,
+            "request_num": 100,
+            "position_str": ""
+        };
+
+        return this.sendTradeReq(paramMap, "GET_STOCK_POSITION", "403", "", complete);
     }
 
 // helper function
@@ -262,13 +312,17 @@ function HuataiAssist() {
 //     "detailtype": "normal"
 // }
     this.queryTickDetail = function(stockCode, market, from, to, complete) {
-        var url = baseHqUrl + stockCode + "/GET_TICK_DETAILNORMAL"
-            + "?market=" + market
+        var exchange = marketToExchange(market);
+        var url = baseHqUrl
+            + "?type=GET_TICK_DETAILNORMAL&exchange=" + exchange
+            + "&stockcode=" + stockCode
             + "&from=" + from
-            + "&to=" + to,
-            option = genGetAjaxOption(url, complete, function(data) {
-                return data;
-            });
+            + "&to=" + to
+            + "&radom=" + Math.random();
+
+        var option = genGetAjaxOption(url, complete, function(data) {
+            return data;
+        });
 
         $.ajax(option);
     }
@@ -298,12 +352,16 @@ function HuataiAssist() {
 //     ]
 // }
     this.queryTick = function(stockCode, market, from, complete) {
-        var url = baseHqUrl + stockCode + "/GET_TICK"
-            + "?market=" + market
-            + "&from=" + from,
-            option = genGetAjaxOption(url, complete, function(data) {
-                return data;
-            });
+        var exchange = marketToExchange(market);
+        var url = baseHqUrl
+            + "?type=GET_TICK&exchange=" + exchange
+            + "&stockcode=" + stockCode
+            + "&from=" + from
+            + "&radom=" + Math.random();
+
+        var option = genGetAjaxOption(url, complete, function(data) {
+            return data;
+        });
 
         $.ajax(option);
     }
@@ -352,12 +410,125 @@ function HuataiAssist() {
 //     }]
 // }
     this.queryStock = function(stockCode, complete) {
-        var url = baseHqUrl + stockCode,
-                option = genGetAjaxOption(url, complete, function(data) {
-                    return data["item"][0];
-                });
+        var url = baseHqUrl
+            + "?type=GET_PRICE_VOLUMEJY^cssweb_type=GET_HQ_B^stockcode="
+            + stockCode
+            + "^"
+            + Math.random();
+
+        var option = genGetAjaxOption(url, complete, function(data) {
+            return data["item"][0];
+        });
 
         $.ajax(option);
     }
 
+// get stock detail response
+//
+// {
+//     "cssweb_code": "success",
+//     "type": "GET_PRICE_VOLUMEJSON",
+//     "stockcode": "sz000009",
+//     "data": [{
+//         "sjw5": 18.010000,
+//         "ssl5": 294.000000,
+//         "sjw4": 18.000000,
+//         "ssl4": 2827.000000,
+//         "sjw3": 17.990000,
+//         "ssl3": 105.000000,
+//         "sjw2": 17.980000,
+//         "ssl2": 1589.000000,
+//         "sjw1": 17.970000,
+//         "ssl1": 4543.000000,
+//         "bjw1": 17.960000,
+//         "bsl1": 858.000000,
+//         "bjw2": 17.950000,
+//         "bsl2": 2019.000000,
+//         "bjw3": 17.940000,
+//         "bsl3": 408.000000,
+//         "bjw4": 17.930000,
+//         "bsl4": 395.000000,
+//         "bjw5": 17.920000,
+//         "bsl5": 200.000000,
+//         "wb": -0.413800,
+//         "wc": -5478.000000,
+//         "zjcj": 17.960000,
+//         "cjje": 899558605.110000,
+//         "zd": -0.570000,
+//         "jrkp": 18.530000,
+//         "zf": -0.030800,
+//         "zgcj": 18.610000,
+//         "cjsl": 493268.200000,
+//         "zdcj": 17.910000,
+//         "xs": 17496.000000,
+//         "lb": 0.546000,
+//         "zt": 20.383000,
+//         "dt": 16.677000,
+//         "zrsp": 18.530000,
+//         "sy": 0.000000,
+//         "gb": 0.000000,
+//         "hs": 0.000000,
+//         "ltsl": 0.000000,
+//         "jz": 0.000000,
+//         "mgsy": 0.000000,
+//         "syjd": 0.000000,
+//         "zqjc": "ä¸­å›½å®å®‰",
+//         "tp": 0,
+//         "fullprice": 0.000000,
+//         "np": 288022.000000,
+//         "wp": 205247.000000
+//     }]
+// }
+    this.queryDetail = function(stockCode, stockType, market, complete) {
+        var exchange = marketToExchange(market);
+        var url = baseHqUrl
+            + "?type=GET_PRICE_VOLUMEJSON&exchange=" + exchange
+            + "&stockcode=" + stockCode
+            + "&stocktype=" + stockType
+            + "&radom=" + Math.random();
+
+        var option = genGetAjaxOption(url, complete, function(data) {
+            return data["data"][0];
+        });
+
+        $.ajax(option);
+    }
+
+    this.startStrategy = function(stockCode, stockAmount, callback) {
+        var url = baseAutoUrl + stockCode;
+        $.ajax({
+            "url": url,
+            "method": "POST",
+            "data": { "amount": stockAmount },
+            "success": function(data) {
+                var status = data["code"], strategyId = data["strategy_id"];
+                callback(status, strategyId);
+            }
+        });
+    }
+
+    this.stopStrategy = function(strategyId, callback) {
+        var url = baseAutoUrl + strategyId;
+        $.ajax({
+            "url": url,
+            "method": "DELETE",
+            "data": "",
+            "success": function(data) {
+                var status = data["code"];
+                callback(status);
+            }
+        });
+    }
+
+    this.getStrategyStatus = function(strategyId, callback) {
+        var url = baseAutoUrl + strategyId;
+        $.ajax({
+            "url": url,
+            "method": "GET",
+            "data": "",
+            "success": function(data) {
+                callback(data);
+            }
+        });
+    }
 }
