@@ -1,7 +1,7 @@
 drop table if exists entries;
-create table accounts (
-  id integer primary key autoincrement,
-  account char not null,
-  pwd char not null,
-  secure_pwd char not null
+create table strategy_log (
+    id integer primary key autoincrement,
+    name text not null,
+    log text not null,
+    update_time timestamp not null
 );
