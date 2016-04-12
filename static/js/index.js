@@ -2,7 +2,7 @@ var common = {}, huatai = new HuataiAssist();
 
 common.renderTableTemplate = function(tableIdSelector, tempSelector, data) {
     var template = $(tempSelector), tempStr = template.html(), htmlOutput = "", htmlItem,
-        matches = tempStr.match(/\{\{:[a-zA-Z_0-9:]+\}\}/g),
+        matches = tempStr.match(/\[\[:[a-zA-Z_0-9:]+\]\]/g),
         tbody = $(tableIdSelector + ">tbody"), param, i, m, keys = [], value;
     if (!data.length) {
         data = [data]

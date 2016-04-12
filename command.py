@@ -35,14 +35,22 @@ def login(captcha, cookies):
     r = requests.post(login_url, data = params, headers = get_session_header(cookies), cookies = cookies)
     if r.status_code != 200:
         print 'login failed'
-        return None
+        return False
+    return True
+
+
+def get_user_info(cookies):
     #logger.info('login result: ' + r.content)
-    r = requests.get(bi_url, headers = get_session_header(cookies), cookies = cookies)
-    p = re.compile(r'<script\s+.*?>\s*var data ?= ?"(.*?)";\s*</script>', re.I | re.M)
-    m = p.search(r.content)
-    d = m.group(1)
-    user = json.loads(d.decode('base64').decode('gbk'))
-    return user
+    try:
+        r = requests.get(bi_url, headers = get_session_header(cookies), cookies = cookies)
+        p = re.compile(r'<script\s+.*?>\s*var data ?= ?"(.*?)";\s*</script>', re.I | re.M)
+        m = p.search(r.content)
+        d = m.group(1)
+        user = json.loads(d.decode('base64').decode('gbk'))
+        return user
+    except Exception, e:
+        logger.error('not login: ' + str(e))
+        return None
 
 
 def get_cookies():
