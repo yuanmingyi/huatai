@@ -21,8 +21,7 @@ jQuery(function($) {
         }
     });
 
-    $(formLogin["login"]).submit(function(e) {
-        e.preventDefault();
+    $(formLogin["login"]).on("click", function(e) {
         var vcode = captcha.value;
         var loginButton = $(this);
         loginButton.prop("disabled", true);
