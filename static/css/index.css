@@ -38,3 +38,7 @@ form {
 	color: #f00;
 	font-weight: bold;
 }
+
+.page-id {
+	visibility: hidden;
+}

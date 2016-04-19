@@ -1,19 +1,21 @@
-import sqlite3, requests, ConfigParser, re, base64, random, json, logging, logging.config, datetime, command
-from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
-from contextlib import closing
-from urllib import urlencode
+import requests, base64, random, json, logging, logging.config, datetime, command, os, strategy_manager
+from flask import Flask, request, g, render_template
 from httplib2 import Http
+from dbservice import DBService
+
 
 # create the application
 app = Flask(__name__)
 app.config.from_object('config')
 logging.config.fileConfig('logging.conf')
+db_service = DBService(app.config['DATABASE'])
 
 login_path = '/api/login'
 captcha_path = '/api/captcha'
 trade_path = '/api/trade/'
 hq_path = '/api/hq/'
 auto_path = '/api/auto/'
+auto_strategies_path = '/api/strategies'
 
 # huatai configuration
 base_url = 'https://service.htsc.com.cn'
@@ -27,33 +29,15 @@ bi_url = base_url + '/service/flashbusiness_new3.jsp?etfCode='
 trade_api_url = 'https://tradegw.htsc.com.cn/'
 hq_api_url = 'http://hq.htsc.com.cn/cssweb'
 
-logger = logging.getLogger('root')
+logger = logging.getLogger(__name__)
 
 # global variables
 user_info = None
-cookies = None
-
-def connect_db():
-    return sqlite3.connect(app.config['DATABASE'])
-
-
-def init_db():
-    with closing(connect_db()) as db:
-        with app.open_resource('schema.sql', mode='r') as f:
-            db.cursor().executescript(f.read())
-        db.commit()
-
-
-def query_db(query, args=(), one=False):
-    cur = g.db.execute(query, args)
-    rv = cur.fetchall()
-    cur.close()
-    return (rv[0] if rv else None) if one else rv
 
 
 @app.before_request
 def before_request():
-    g.db = connect_db()
+    g.db = db_service.connect_db()
 
 
 @app.teardown_request
@@ -92,29 +76,28 @@ def auto():
 # ajax requests
 @app.route(login_path, methods = ['POST'])
 def api_login():
-    captcha = request.args.get('captcha', '')
-    logger.info('cookies: ' + cookies)
-    success = command.login(captcha, cookies)
-    if not success:
-        return 'login failed'
     global user_info
-    user_info = command.get_user_info(cookies)
-    strategy.init_strategy(user_info)
-    return 'login successfully'
+    cookies = get_cookies()
+    captcha = request.values.get('captcha', '')
+    logger.info('cookies: ' + str(cookies))
+    success = command.login(captcha, cookies)
+    if success:
+        user_info = command.get_user_info(cookies)
+        if user_info is not None:
+            return 'login successfully'
+    return 'login failed'
 
 
 @app.route(login_path, methods = ['GET'])
 def api_get_login_status():
     global user_info
-    user_info = command.get_user_info(cookies)
+    user_info = command.get_user_info(get_cookies())
     return 'offline' if user_info is None else 'online'
 
 
 @app.route(captcha_path, methods = ['GET'])
 def api_get_captcha():
-    if cookies is None:
-        refresh_cookies()
-    r = requests.get(captcha_url, cookies = cookies);
+    r = requests.get(captcha_url, cookies = get_cookies());
     return r.content, r.status_code
 
 
@@ -146,73 +129,61 @@ def api_trade():
 
 @app.route(hq_path, methods = ['GET'])
 def api_hq():
-    url = hq_api_url + '?type=' + request.args['type']
+    url = hq_api_url + '?type=' + request.args.get('type')
     res, content = Http().request(url)
     return content, res.status
 
 
-@app.route(auto_path + '<stock_code>', methods = ['POST'])
-def api_start_auto(stock_code):
-    stock_amount = request.args.get('amount', 0)
-    interval = request.args.get('interval', 5)
-    threshold = request.args.get('threshold', 0.01)
+@app.route(auto_path + '<strategy_name>', methods = ['POST'])
+def api_start_auto(strategy_name):
+    stock_code = request.values.get('stock_code')
+    stock_amount = request.values.get('amount')
+    interval = request.values.get('interval', 5)
+    threshold = request.values.get('threshold', 0.01)
     if stock_amount <= 0:
         logger.warn('stock amount must be greater than 0')
         return json.dumps({'code':'error'})
-
-    strategy_id = strategy.start_strategy('simple', interval, \
-        {'stock_code': stock_code, 'stock_amount': stock_amount, 'threshold': threshold, 'user_info': user_info})
+    strategy_id = strategy_manager.start(strategy_name, interval, \
+                                         {'stock_code': stock_code, 'stock_amount': stock_amount, 'threshold': threshold, 'user_info': user_info})
     code = ''
     if strategy_id is None:
         code = 'error'
     return json.dumps({'code': code, 'strategy_id': strategy_id})
 
 
-@app.route(auto_path + '<strategy_name>', methods = ['DELETE'])
-def api_stop_auto(strategy_name):
-    file_name = strategy.get_logger_filename(strategy_name)
-    strategy.stop_strategy(strategy_name)
-    if file_name is not None:
-        try:
-            with open(file_name, 'r') as f:
-                content = f.read()
-            res = query_db('insert into strategy_log (name, log, update_time) values (?, ?, ?)', \
-                args = (strategy_name, content, datetime.datetime.now()), one = True)
-            if res is not None and res[0] == 1:
-                logger.info('log saved to db')
-            else:
-                logger.warn('saving log failed')
-            os.remove(file_name)
-        except Exception, e:
-            logger.error('save log file %s to db failed: %s' %(file_name, str(e)))
-    return ''
+@app.route(auto_path + '<strategy_id>', methods = ['DELETE'])
+def api_stop_auto(strategy_id):
+    strategy_manager.stop(strategy_id)
+    return '{"code":""}'
 
 
-@app.route(auto_path + '<strategy_name>', methods = ['GET'])
-def api_get_auto_status(strategy_name):
-    file_name = strategy.get_logger_filename(strategy_name)
-    if file_name is None:
-        try:
-            row = query_db('select * from strategy_log where strategy_name = ? order by udpate_time desc limit 1', \
-                args = (strategy_name,), one = True)
-        except Exception, e:
-            logger.error('query log from db failed: %s' %(str(e)))
-        return row['log'] if row is not None else ('strategy not found', 400)
-
-    def generator():
-        f = open(file_name, 'r')
-        l = ''
-        while strategy.is_started(strategy_name) or l != '':
-            l = f.readline()
-            if l != '':
-                yield l
-    return generator()
+@app.route(auto_path + '<strategy_id>', methods = ['GET'])
+def api_get_auto_status(strategy_id):
+    round = request.args.get('round', -1)
+    count = request.args.get('count', 10)
+    return strategy_manager.get_log(strategy_id, round, count)
 
 
-def refresh_cookies():
-    global cookies
-    res = requests.get(base_url)
-    cookies = res.cookies
+@app.route(auto_path, methods = ['GET'])
+def api_get_auto_running_strategies():
+    strategies = strategy_manager.get_all_running_strategies()
+    return json.dumps(strategies)
+
+
+@app.route(auto_strategies_path, methods = ['GET'])
+def api_get_all_strategies():
+    strategies = strategy_manager.get_all_available_strategies()
+    return json.dumps(strategies)
+
+
+__cookies = None
+def get_cookies():
+    global __cookies
+    if __cookies is None:
+        res = requests.get(base_url)
+        __cookies = res.cookies
+        logger.info('cookies refresh: %s' %(__cookies))
+    return __cookies
 
 
 if __name__ == '__main__':

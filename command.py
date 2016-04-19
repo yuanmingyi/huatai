@@ -1,5 +1,7 @@
-import requests, random, logging, logging.config, ConfigParser, re, json, base64
+import requests, random, logging, logging.config, ConfigParser, re, json, base64, urllib, os
 from httplib2 import Http
+
+print 'load command in ', os.getpid()
 
 trade_api_url = 'https://tradegw.htsc.com.cn/'
 hq_api_url = 'http://hq.htsc.com.cn/cssweb'
@@ -8,14 +10,13 @@ login_url = base_url + '/service/loginAction.do?method=login'
 captcha_url = base_url + '/service/pic/verifyCodeImage.jsp'
 bi_url = base_url + '/service/flashbusiness_new3.jsp?etfCode='
 
-logging.config.fileConfig('logging.conf')
-logger = logging.getLogger()
 
 def market_to_exchange(market):
     return 'sh' if int(market) == 1 else ('sz' if int(market) == 2 else None)
 
 
 def login(captcha, cookies):
+    logger = logging.get_logger(__name__)
     secure = load_config()
     params = { \
         'userType': 'jy', \
@@ -31,7 +32,7 @@ def login(captcha, cookies):
         'trdpwd': secure.get('login', 'trdpwd'), \
         'vcode': captcha \
     }
-    logger.info('login param: ' + json.dumps(params))
+    logger.info('login param: ' + urllib.urlencode(params))
     r = requests.post(login_url, data = params, headers = get_session_header(cookies), cookies = cookies)
     if r.status_code != 200:
         print 'login failed'
@@ -40,6 +41,7 @@ def login(captcha, cookies):
 
 
 def get_user_info(cookies):
+    logger = logging.getLogger(__name__)
     #logger.info('login result: ' + r.content)
     try:
         r = requests.get(bi_url, headers = get_session_header(cookies), cookies = cookies)
@@ -63,6 +65,7 @@ def get_session_header(cookies):
 
 
 def get_captcha(cookies):
+    logger = logging.getLogger(__name__)
     r = requests.get(captcha_url, cookies = cookies)
     if r.status_code == 200:
         return r.content
@@ -72,7 +75,7 @@ def get_captcha(cookies):
 
 def send_trade_req(user, params, req_type, func_id, ex_type):
     if user is None:
-        return
+        return 'error', 'user not login'
 
     accounts = user['item'];
     stock_account = ''

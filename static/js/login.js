@@ -1,5 +1,5 @@
 jQuery(function($) {
-	var formLogin = $("#login-form")[0], captcha = formLogin["captcha"];
+    var formLogin = $("#login-form")[0], captcha = formLogin["captcha"];
 
     function init() {
         $("#captcha").attr("src", huatai.getCaptchaUrl());

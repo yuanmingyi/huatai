@@ -8,6 +8,7 @@ function HuataiAssist() {
     var baseTradeUrl = "/api/trade/";
     var baseHqUrl = "/api/hq/";
     var baseAutoUrl = "/api/auto/";
+    var allStrategiesUrl = "/api/strategies";
 
     this.getCaptchaUrl = function() {
         return captchaUrl + "?ran=" + Math.random();
@@ -30,7 +31,7 @@ function HuataiAssist() {
             "data": "",
             "method": "GET",
             "success": callback
-        });   
+        });
     }
 //
 //  ajax methods
@@ -494,12 +495,13 @@ function HuataiAssist() {
         $.ajax(option);
     }
 
-    this.startStrategy = function(stockCode, stockAmount, callback) {
-        var url = baseAutoUrl + stockCode;
+    this.startStrategy = function(strategyName, stockCode, stockAmount, callback) {
+        var url = baseAutoUrl + strategyName;
         $.ajax({
             "url": url,
             "method": "POST",
-            "data": { "amount": stockAmount },
+            "dataType": "json",
+            "data": { "stock_code": stockCode, "amount": stockAmount },
             "success": function(data) {
                 var status = data["code"], strategyId = data["strategy_id"];
                 callback(status, strategyId);
@@ -512,7 +514,7 @@ function HuataiAssist() {
         $.ajax({
             "url": url,
             "method": "DELETE",
-            "data": "",
+            "dataType": "json",
             "success": function(data) {
                 var status = data["code"];
                 callback(status);
@@ -522,11 +524,34 @@ function HuataiAssist() {
 
     this.getStrategyStatus = function(strategyId, callback) {
         var url = baseAutoUrl + strategyId;
-        $.ajax({
+        return $.ajax({
             "url": url,
             "method": "GET",
-            "data": "",
+            "complete": function(jqXhr, textStatus) {
+                callback(textStatus === "success" ? "" : textStatus, jqXhr.responseText);
+            }
+        });
+    }
+
+    this.getRunningStrategies = function(callback) {
+        $.ajax({
+            "url": baseAutoUrl,
+            "method": "GET",
+            "dataType": "json",
             "success": function(data) {
+                console.log(data)
+                callback(data);
+            }
+        });
+    }
+
+    this.getAvailableStrategies = function(callback) {
+        $.ajax({
+            "url": allStrategiesUrl,
+            "method": "GET",
+            "dataType": "json",
+            "success": function(data) {
+                console.log(data)
                 callback(data);
             }
         });

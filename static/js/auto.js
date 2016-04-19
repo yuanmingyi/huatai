@@ -1,44 +1,47 @@
 jQuery(function($) {
-	var refresh = false, form = $("#auto-form")[0], strategyId = "", logger = loggerBuilder("#strategy-log");
+    var form = $("#auto-form")[0], strategyId = "", logger = loggerBuilder("#strategy-log");
 
-	function startAutoTrade() {
-        var timeout = $(form["timeout"]).val() * 1000, stockCode = $(form["stock-code"]).val(),
+    huatai.getAvailableStrategies(function(data) {
+        for (var i = 0; i < data.length; i++) {
+            var strategy_name = data[i];
+            $("#auto-strategy-name").append("<option value='" + strategy_name + "'>" + strategy_name + "</option>");
+        }
+    });
+
+    function startAutoTrade() {
+        var timer, stockCode = $(form["stock-code"]).val(), strategy_name = $(form["strategy-name"]).val()
                     toggle = $(form["toggle"]), stockAmount = parseInt($(form["stock-amount"]).val()) * 100;
 
-        toggle.text('stop');
-        refresh = true;
-        huatai.startStrategy(stockCode, stockAmount, function(err, data) {
+        toggle.text("stop");
+        huatai.startStrategy(strategy_name, stockCode, stockAmount, function(err, data) {
             if (!err) {
                 strategyId = data;
-                startRefresh();
+                console.log(strategyId);
+                var jqXhr = huatai.getStrategyStatus(strategyId, function(err, data) {
+                    if (err) {
+                        common.updateStatus(err, data);
+                    }
+                    window.clearTimeout(timer);
+                });
+                timer = setInterval(function() {
+                    logger.append(jqXhr.responseText);
+                }, 1000);
             } else {
-                toggle.text('start');
-                refresh = false;
-            }
-        });
-	}
-
-    function startRefresh() {
-        huatai.getStrategyStatus(strategyId, function(err, data) {
-            if (!err) {
-                logger.append(data);
-            } else {
-                common.updateStatus(err, data);
-            }
-
-            if (refresh) {
-                setTimeout(startRefresh, timeout);
+                alert("start strategy failed: " + data);
+                toggle.text("start");
             }
         });
     }
 
     function stopAutoTrade() {
-        huatai.stopStrategy(strategyId);
+        huatai.stopStrategy(strategyId, function() {
+            toggle.text("start");
+        });
     }
 
     $(form["toggle"]).on("click", function() {
         $this = $(this);
-        if ($this.text() == "stop") {
+        if ($this.text() === "start") {
             // check input
             startAutoTrade();
         } else {

@@ -1,5 +1,5 @@
 jQuery(function($) {
-	var formStock = $("#stock-form")[0], stockData = null;
+    var formStock = $("#stock-form")[0], stockData = null;
 
     function setStockData(data) {
         stockData = data;

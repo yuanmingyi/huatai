@@ -1,4 +1,4 @@
-drop table if exists entries;
+drop table if exists strategy_log;
 create table strategy_log (
     id integer primary key autoincrement,
     name text not null,

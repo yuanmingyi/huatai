@@ -1,5 +1,5 @@
 jQuery(function($) {
-	var timer, formTrade = $("#entrust-form")[0], stockData = null;
+    var timer, formTrade = $("#entrust-form")[0], stockData = null;
 
     function setStockData(data) {
         stockData = data;

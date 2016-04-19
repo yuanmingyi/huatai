@@ -46,3 +46,12 @@ common.market = {
     "1": "上证",
     "2": "深证"
 };
+
+jQuery(function($) {
+    var page_id = $(".page-id").text();
+    $(".nav>li>a").on("click", function() {
+        window.location.href = $(this).attr("link");
+    });
+    $(".nav>li").removeClass('active');
+    $(".nav>li:contains(" + page_id + ")").addClass('active');
+});

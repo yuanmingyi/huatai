@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
+    <div class="page-id">Login</div>
     <script src="{{ url_for('static', filename='js/login.js') }}" type=text/javascript></script>
     <form id="login-form" class="form-horizontal">
         <div class="form-group">
@@ -14,7 +15,7 @@
                 <input class="form-control" type="text" name="captcha" id="captcha-text" placeholder="captcha"/>
             </div>
             <div class="col-md-2">
-                <button class="btn btn-default" id="refresh">refresh</button>
+                <button class="btn btn-default" type="button" id="refresh">refresh</button>
             </div>
         </div>
         <div class="form-group">

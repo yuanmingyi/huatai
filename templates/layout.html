@@ -28,19 +28,19 @@
 <div class=container>
     <ul id="rootTabs" class="nav nav-tabs" role="tablist">
         <li role=presentation class=active>
-            <a href="{{ url_for('login') }}" id="login-tab" aria-controls="login-page" role="tab" data-toggle="tab">Login</a>
+            <a href="#" link="{{ url_for('login') }}" id="login-tab" aria-controls="login-page" role="tab" data-toggle="tab">Login</a>
         </li>
         <li role="presentation">
-            <a href="{{ url_for('trade') }}" id="trade-tab" aria-controls="trade-page" role="tab" data-toggle="tab">Trade</a>
+            <a href="#" link="{{ url_for('trade')}}" id="trade-tab" aria-controls="trade-page" role="tab" data-toggle="tab">Trade</a>
         </li>
         <li role="presentation">
-            <a href="{{ url_for('undo') }}" id="undo-tab" aria-controls="undo-page" role="tab" data-toggle="tab">Undo</a>
+            <a href="#" link="{{ url_for('undo') }}" id="undo-tab" aria-controls="undo-page" role="tab" data-toggle="tab">Undo</a>
         </li>
         <li role="presentation">
-            <a href="{{ url_for('data') }}" id="data-tab" aria-controls="data-page" role="tab" data-toggle="tab">Data</a>
+            <a href="#" link="{{ url_for('data') }}" id="data-tab" aria-controls="data-page" role="tab" data-toggle="tab">Data</a>
         </li>
         <li role="presentation">
-            <a href="{{ url_for('auto') }}" id="auto-tab" aria-controls="auto-page" role="tab" data-toggle="tab">Auto</a>
+            <a href="#" link="{{ url_for('auto') }}" id="auto-tab" aria-controls="auto-page" role="tab" data-toggle="tab">Auto</a>
         </li>
     </ul>
     <div class="tab-content">
