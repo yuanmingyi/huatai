@@ -497,14 +497,17 @@ function HuataiAssist() {
 
     this.startStrategy = function(strategyName, stockCode, stockAmount, callback) {
         var url = baseAutoUrl + strategyName;
+
         $.ajax({
             "url": url,
             "method": "POST",
             "dataType": "json",
-            "data": { "stock_code": stockCode, "amount": stockAmount },
+            "data": { "stock_code": stockCode, "amount": stockAmount, "interval": interval, "threshold", threshold },
             "success": function(data) {
                 var status = data["code"], strategyId = data["strategy_id"];
-                callback(status, strategyId);
+                if (!!callback) {
+                    callback(status, strategyId);
+                }
             }
         });
     }
@@ -522,11 +525,15 @@ function HuataiAssist() {
         });
     }
 
-    this.getStrategyStatus = function(strategyId, callback) {
+    this.getStrategyStatus = function(strategyId, round, count, callback) {
         var url = baseAutoUrl + strategyId;
         return $.ajax({
             "url": url,
             "method": "GET",
+            "data": {
+                "round": round,
+                "count": count
+            },
             "complete": function(jqXhr, textStatus) {
                 callback(textStatus === "success" ? "" : textStatus, jqXhr.responseText);
             }

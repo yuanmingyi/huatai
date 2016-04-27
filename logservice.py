@@ -44,6 +44,7 @@ class LogService:
             start_round = self.get_current_round() - rounds + 1
             if start_round < 0:
                 start_round = 0
+        end_round = start_round + rounds
         for r in range(start_round, start_round + rounds):
             filename = self.__get_filename(r)
             try:
@@ -51,7 +52,9 @@ class LogService:
                     content += f.read()
             except:
                 print 'file cannot open: ', filename
-        return content
+                end_round = r
+                break
+        return end_round, content
 
 
     def clear(self):

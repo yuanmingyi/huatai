@@ -161,7 +161,8 @@ def api_stop_auto(strategy_id):
 def api_get_auto_status(strategy_id):
     round = request.args.get('round', -1)
     count = request.args.get('count', 10)
-    return strategy_manager.get_log(strategy_id, round, count)
+    end_round, log = strategy_manager.get_log(strategy_id, round, count)
+    return json.dumps({'end_round': end_round, 'log_content': log})
 
 
 @app.route(auto_path, methods = ['GET'])

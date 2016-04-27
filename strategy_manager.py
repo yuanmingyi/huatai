@@ -34,7 +34,7 @@ def get_log(strategy_id, round, count):
     value = __tasks.get(strategy_id)
     if value is None:
         logger.warn('strategy %s is not running' %(strategy_id))
-        return ''
+        return -1, ''
     pipe, pid = value
     logservice = LogService(strategy_id, pid)
     return logservice.get_log_content(round, count)
