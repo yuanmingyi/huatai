@@ -16,7 +16,7 @@ def market_to_exchange(market):
 
 
 def login(captcha, cookies):
-    logger = logging.get_logger(__name__)
+    logger = logging.getLogger(__name__)
     secure = load_config()
     params = { \
         'userType': 'jy', \

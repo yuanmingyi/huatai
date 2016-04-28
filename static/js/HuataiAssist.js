@@ -495,14 +495,14 @@ function HuataiAssist() {
         $.ajax(option);
     }
 
-    this.startStrategy = function(strategyName, stockCode, stockAmount, callback) {
+    this.startStrategy = function(strategyName, stockCode, stockAmount, interval, threshold, callback) {
         var url = baseAutoUrl + strategyName;
 
         $.ajax({
             "url": url,
             "method": "POST",
             "dataType": "json",
-            "data": { "stock_code": stockCode, "amount": stockAmount, "interval": interval, "threshold", threshold },
+            "data": { "stock_code": stockCode, "amount": stockAmount, "interval": interval, "threshold": threshold },
             "success": function(data) {
                 var status = data["code"], strategyId = data["strategy_id"];
                 if (!!callback) {

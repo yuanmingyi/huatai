@@ -11,7 +11,7 @@ class LogService:
 
 
     def __get_filename(self, round):
-        return os.path.join(self.__dir_name, round, '.log')
+        return os.path.join(self.__dir_name, str(round), '.log')
 
 
     def get_logger(self, round):
