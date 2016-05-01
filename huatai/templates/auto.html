@@ -5,18 +5,32 @@
     <script src="{{ url_for('static', filename='js/auto.js') }}" type=text/javascript></script>
     <form id="auto-form" class="form-horizontal">
         <div class="form-group">
-            <div class="col-sm-3">
+            <div class="col-sm-2">
                 <label class="sr-only" for="auto-stock-code">stock code:</label>
                 <div class="input-group">
                     <input class="form-control" type="text" name="stock-code" id="auto-stock-code" placeholder="stock code"/>
                     <div class="input-group-addon" id="auto-market"></div>
                 </div>
             </div>
-            <div class="col-sm-3">
+            <div class="col-sm-2">
                 <label class="sr-only" for="auto-stock-name">amount:</label>
                 <div class="input-group">
                     <input class="form-control" type="text" name="stock-amount" id="auto-stock-name" placeholder="amount"/>
                     <div class="input-group-addon">00</div>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <label class="sr-only" for="auto-stock-name">interval:</label>
+                <div class="input-group">
+                    <input class="form-control" type="text" name="interval" id="auto-interval" placeholder="interval"/>
+                    <div class="input-group-addon">sec</div>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <label class="sr-only" for="auto-threshold">threshold:</label>
+                <div class="input-group">
+                    <input class="form-control" type="text" name="threshold" id="auto-threshold" placeholder="threshold"/>
+                    <div class="input-group-addon">rmb</div>
                 </div>
             </div>
             <div class="col-sm-2">

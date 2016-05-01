@@ -48,6 +48,9 @@ function loggerBuilder(domOrSelector) {
             if (autoScroll) {
                 con.scrollTop(con[0].scrollHeight);
             }
+        },
+        "appendLogs": function(text) {
+            this.append(text.replace(/\n/g,'<br>'));
         }
     }
 }

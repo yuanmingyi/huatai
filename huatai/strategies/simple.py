@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import command, strategy
+import strategy
+from huatai import command
+
 
 class Simple(strategy.Strategy):
     def run(self, logger, strategy_args):

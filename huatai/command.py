@@ -1,4 +1,12 @@
-import requests, random, logging, logging.config, ConfigParser, re, json, base64, urllib, os
+import requests
+import random
+import logging
+import ConfigParser
+import re
+import json
+import base64
+import urllib
+import os
 from httplib2 import Http
 
 print 'load command in ', os.getpid()
@@ -18,19 +26,19 @@ def market_to_exchange(market):
 def login(captcha, cookies):
     logger = logging.getLogger(__name__)
     secure = load_config()
-    params = { \
-        'userType': 'jy', \
-        'loginEvent': 1, \
-        'trdpwdEns': secure.get('login', 'trdpwd'), \
-        'macaddr': secure.get('login', 'mac'), \
-        'hddInfo': secure.get('login', 'hdd'), \
-        'lipInfo': secure.get('login', 'ip'), \
-        'topath': None, \
-        'accountType': 1, \
-        'userName': secure.get('login', 'user_id'), \
-        'servicePwd': secure.get('login', 'pwd'), \
-        'trdpwd': secure.get('login', 'trdpwd'), \
-        'vcode': captcha \
+    params = {
+        'userType': 'jy',
+        'loginEvent': 1,
+        'trdpwdEns': secure.get('login', 'trdpwd'),
+        'macaddr': secure.get('login', 'mac'),
+        'hddInfo': secure.get('login', 'hdd'),
+        'lipInfo': secure.get('login', 'ip'),
+        'topath': None,
+        'accountType': 1,
+        'userName': secure.get('login', 'user_id'),
+        'servicePwd': secure.get('login', 'pwd'),
+        'trdpwd': secure.get('login', 'trdpwd'),
+        'vcode': captcha
     }
     logger.info('login param: ' + urllib.urlencode(params))
     r = requests.post(login_url, data = params, headers = get_session_header(cookies), cookies = cookies)
@@ -77,7 +85,7 @@ def send_trade_req(user, params, req_type, func_id, ex_type):
     if user is None:
         return 'error', 'user not login'
 
-    accounts = user['item'];
+    accounts = user['item']
     stock_account = ''
     for account in accounts:
         if account['exchange_type'] == str(ex_type):
@@ -116,38 +124,38 @@ def send_trade_req(user, params, req_type, func_id, ex_type):
 
 
 def buy(user, market, stock_code, entrust_amount, entrust_price):
-    param = { \
-        'stock_code': stock_code, \
-        'entrust_amount': entrust_amount, \
-        'entrust_price': entrust_price, \
-        'entrust_prop': entrust_prop, \
-        'entrust_bs': 1 \
+    param = {
+        'stock_code': stock_code,
+        'entrust_amount': entrust_amount,
+        'entrust_price': entrust_price,
+        'entrust_prop': 0,
+        'entrust_bs': 1
     }
 
     return send_trade_req(user, param, 'STOCK_BUY', '302', market)
 
 
-def buy_mp(user, market, stock_code, entrust_amount, entrust_prop, undo = None):
+def buy_mp(user, market, stock_code, entrust_amount, entrust_price, undo = None):
     entrust_prop = 'R' if undo is None else 'U'
 
-    param = { \
-        'stock_code': stock_code, \
-        'entrust_amount': entrust_amount, \
-        'entrust_price': entrust_price, \
-        'entrust_prop': entrust_prop, \
-        'entrust_bs': 1 \
+    param = {
+        'stock_code': stock_code,
+        'entrust_amount': entrust_amount,
+        'entrust_price': entrust_price,
+        'entrust_prop': entrust_prop,
+        'entrust_bs': 1
     }
 
     return send_trade_req(user, param, 'STOCK_BUY_MP', '302', market)
 
 
 def sell(user, market, stock_code, entrust_amount, entrust_price):
-    param = { \
-        'stock_code': stock_code, \
-        'entrust_amount': entrust_amount, \
-        'entrust_price': entrust_price, \
-        'entrust_prop': 0, \
-        'entrust_bs': 2 \
+    param = {
+        'stock_code': stock_code,
+        'entrust_amount': entrust_amount,
+        'entrust_price': entrust_price,
+        'entrust_prop': 0,
+        'entrust_bs': 2
     }
 
     return send_trade_req(user, param, 'STOCK_SALE', '302', market)
@@ -156,12 +164,12 @@ def sell(user, market, stock_code, entrust_amount, entrust_price):
 def sell_mp(user, market, stock_code, entrust_amount, entrust_price, undo = None):
     entrust_prop = 'R' if undo is None else 'U'
 
-    param = { \
-        'stock_code': stock_code, \
-        'entrust_amount': entrust_amount, \
-        'entrust_price': entrust_price, \
-        'entrust_prop': entrust_prop, \
-        'entrust_bs': 2 \
+    param = {
+        'stock_code': stock_code,
+        'entrust_amount': entrust_amount,
+        'entrust_price': entrust_price,
+        'entrust_prop': entrust_prop,
+        'entrust_bs': 2
     }
 
     return send_trade_req(user, param, 'STOCK_SALE_MP', '302', market)
@@ -269,5 +277,5 @@ def query_detail(stock_code, stock_type, market):
 
 def load_config():
     cf = ConfigParser.ConfigParser() 
-    cf.read('huatai.conf')
+    cf.read('huatai/huatai.conf')
     return cf

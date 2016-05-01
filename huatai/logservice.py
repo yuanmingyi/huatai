@@ -1,5 +1,6 @@
 import os, logging, logging.handlers, shutil
 
+
 class LogService:
     def __init__(self, strategy_id, pid, level = logging.DEBUG,\
                  fmt = '%(asctime)s-%(process)d-%(filename)s:%(lineno)d-%(levelname)s %(message)s'):
@@ -9,13 +10,11 @@ class LogService:
         if not os.path.isdir(self.__dir_name):
             os.makedirs(self.__dir_name)
 
+    def __get_filename(self, num):
+        return os.path.join(self.__dir_name, str(num) + '.log')
 
-    def __get_filename(self, round):
-        return os.path.join(self.__dir_name, str(round), '.log')
-
-
-    def get_logger(self, round):
-        filename = self.__get_filename(round)
+    def get_logger(self, num):
+        filename = self.__get_filename(num)
         logger = logging.getLogger(filename)
         logger.setLevel(self.__level)
         if len(logger.handlers) == 0:
@@ -26,17 +25,14 @@ class LogService:
             logger.addHandler(fh)
         return logger
 
-
     def close_logger(self, logger):
         for handler in logger.handlers[:]:
             handler.close()
             logger.removeHandler(handler)
 
-
     def get_current_round(self):
-        current_round = max(int(filename) for filename in os.listdir(self.__dir_name))
+        current_round = max(int(filename[:filename.index('.')]) for filename in os.listdir(self.__dir_name))
         return current_round
-
 
     def get_log_content(self, start_round, rounds):
         content = ''
@@ -46,7 +42,7 @@ class LogService:
                 start_round = 0
         end_round = start_round + rounds
         for r in range(start_round, start_round + rounds):
-            filename = self.__get_filename(r)
+            filename = os.path.join(os.getcwd(), self.__get_filename(r))
             try:
                 with open(filename, 'r') as f:
                     content += f.read()
@@ -56,11 +52,9 @@ class LogService:
                 break
         return end_round, content
 
-
     def clear(self):
         if os.path.isdir(self.__dir_name):
             try:
                 shutil.rmtree(self.__dir_name)
             except:
                 print 'remove dir failed: ', self.__dir_name
-

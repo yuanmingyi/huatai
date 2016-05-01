@@ -1,14 +1,14 @@
-import requests, base64, random, json, logging, logging.config, datetime, command, os, strategy_manager
-from flask import Flask, request, g, render_template
+from huatai import app
+from flask import request
 from httplib2 import Http
-from dbservice import DBService
+import requests
+import base64
+import json
+import logging
+import command
+import strategy_manager
+import random
 
-
-# create the application
-app = Flask(__name__)
-app.config.from_object('config')
-logging.config.fileConfig('logging.conf')
-db_service = DBService(app.config['DATABASE'])
 
 login_path = '/api/login'
 captcha_path = '/api/captcha'
@@ -33,48 +33,10 @@ logger = logging.getLogger(__name__)
 
 # global variables
 user_info = None
-
-
-@app.before_request
-def before_request():
-    g.db = db_service.connect_db()
-
-
-@app.teardown_request
-def teardown_request(exception):
-    db = getattr(g, 'db', None)
-    if db is not None:
-        db.close()
-
-
-@app.route('/')
-@app.route('/login')
-def login():
-    return render_template('login.html')
-
-
-@app.route('/trade')
-def trade():
-    return render_template('trade.html')
-
-
-@app.route('/undo')
-def undo():
-    return render_template('undo.html')
-
-
-@app.route('/data')
-def data():
-    return render_template('data.html')
-
-
-@app.route('/auto')
-def auto():
-    return render_template('auto.html')
-
+__cookies = None
 
 # ajax requests
-@app.route(login_path, methods = ['POST'])
+@app.route(login_path, methods=['POST'])
 def api_login():
     global user_info
     cookies = get_cookies()
@@ -88,23 +50,23 @@ def api_login():
     return 'login failed'
 
 
-@app.route(login_path, methods = ['GET'])
+@app.route(login_path, methods=['GET'])
 def api_get_login_status():
     global user_info
     user_info = command.get_user_info(get_cookies())
     return 'offline' if user_info is None else 'online'
 
 
-@app.route(captcha_path, methods = ['GET'])
+@app.route(captcha_path, methods=['GET'])
 def api_get_captcha():
-    r = requests.get(captcha_url, cookies = get_cookies());
+    r = requests.get(captcha_url, cookies = get_cookies())
     return r.content, r.status_code
 
 
-@app.route(trade_path, methods = ['GET'])
+@app.route(trade_path, methods=['GET'])
 def api_trade():
     if user_info is None:
-        return 'login first', 400
+        return 'login first', 403
     ex_type = request.args.get('exchange_type', '')
     accounts = user_info['item']
     stock_account = ''
@@ -127,23 +89,23 @@ def api_trade():
     return data
 
 
-@app.route(hq_path, methods = ['GET'])
+@app.route(hq_path, methods=['GET'])
 def api_hq():
     url = hq_api_url + '?type=' + request.args.get('type')
     res, content = Http().request(url)
     return content, res.status
 
 
-@app.route(auto_path + '<strategy_name>', methods = ['POST'])
+@app.route(auto_path + '<strategy_name>', methods=['POST'])
 def api_start_auto(strategy_name):
     stock_code = request.values.get('stock_code')
-    stock_amount = request.values.get('amount')
-    interval = request.values.get('interval', 5)
-    threshold = request.values.get('threshold', 0.01)
+    stock_amount = int(request.values.get('amount', '100'))
+    interval = float(request.values.get('interval', '5'))
+    threshold = float(request.values.get('threshold', '0.01'))
     if stock_amount <= 0:
         logger.warn('stock amount must be greater than 0')
         return json.dumps({'code':'error'})
-    strategy_id = strategy_manager.start(strategy_name, interval, \
+    strategy_id = strategy_manager.start(strategy_name, interval,
                                          {'stock_code': stock_code, 'stock_amount': stock_amount, 'threshold': threshold, 'user_info': user_info})
     code = ''
     if strategy_id is None:
@@ -151,42 +113,36 @@ def api_start_auto(strategy_name):
     return json.dumps({'code': code, 'strategy_id': strategy_id})
 
 
-@app.route(auto_path + '<strategy_id>', methods = ['DELETE'])
+@app.route(auto_path + '<strategy_id>', methods=['DELETE'])
 def api_stop_auto(strategy_id):
     strategy_manager.stop(strategy_id)
     return '{"code":""}'
 
 
-@app.route(auto_path + '<strategy_id>', methods = ['GET'])
+@app.route(auto_path + '<strategy_id>', methods=['GET'])
 def api_get_auto_status(strategy_id):
-    round = request.args.get('round', -1)
-    count = request.args.get('count', 10)
+    round = int(request.args.get('round', '-1'))
+    count = int(request.args.get('count', '10'))
     end_round, log = strategy_manager.get_log(strategy_id, round, count)
     return json.dumps({'end_round': end_round, 'log_content': log})
 
 
-@app.route(auto_path, methods = ['GET'])
+@app.route(auto_path, methods=['GET'])
 def api_get_auto_running_strategies():
     strategies = strategy_manager.get_all_running_strategies()
     return json.dumps(strategies)
 
 
-@app.route(auto_strategies_path, methods = ['GET'])
+@app.route(auto_strategies_path, methods=['GET'])
 def api_get_all_strategies():
     strategies = strategy_manager.get_all_available_strategies()
     return json.dumps(strategies)
 
 
-__cookies = None
 def get_cookies():
     global __cookies
     if __cookies is None:
         res = requests.get(base_url)
         __cookies = res.cookies
-        logger.info('cookies refresh: %s' %(__cookies))
+        logger.info('cookies refresh: %s' % __cookies)
     return __cookies
-
-
-if __name__ == '__main__':
-    app.run()
-

@@ -1,8 +1,14 @@
-import logging, logging.config, os, time, traceback, threading, strategies.strategies_loader as loader
+import logging
+import logging.config
+import os
+import threading
+import time
+import traceback
 from multiprocessing import Process, Pipe
-from utilities.threadsafedict import ThreadSafeDict
-from logservice import LogService
 
+from huatai.strategies import strategies_loader as loader
+from huatai.utilities.threadsafedict import ThreadSafeDict
+from logservice import LogService
 
 print 'load strategies_loader in ', os.getpid()
 __tasks = ThreadSafeDict()
@@ -33,7 +39,7 @@ def get_log(strategy_id, round, count):
     logger = logging.getLogger(__name__)
     value = __tasks.get(strategy_id)
     if value is None:
-        logger.warn('strategy %s is not running' %(strategy_id))
+        logger.warn('strategy %s is not running' % strategy_id)
         return -1, ''
     pipe, pid = value
     logservice = LogService(strategy_id, pid)
@@ -48,12 +54,12 @@ def start(strategy_name, interval, strategy_args):
         return None
     strategy_id = __generate_strategy_id(strategy_name, strategy_args)
     if __tasks.has_key(strategy_id):
-        logger_root.warn('task %s already run' %(strategy_id))
+        logger_root.warn('task %s already run' % strategy_id)
         return None
     else:
         logger_root.info('create new task for: ' + strategy_name)
         parent, child = Pipe(True)
-        p = Process(target = __wrapper, args = (child, strategy_instance, strategy_id, interval, strategy_args))
+        p = Process(target=__wrapper, args=(child, strategy_instance, strategy_id, interval, strategy_args))
         __tasks.add(strategy_id, (parent, None))
         p.start()
         return strategy_id
@@ -70,7 +76,7 @@ def stop(strategy_id):
         pipe, pid = value
         __tasks.delete(strategy_id)
         pipe.send(True)
-        logger_root.info('task %s (pid=%s) is deleted' %(strategy_id, str(pid)))
+        logger_root.info('task %s (pid=%s) is deleted' % (strategy_id, str(pid)))
 
 
 def __wrapper(conn, strategy_instance, strategy_id, interval, strategy_args):
@@ -78,21 +84,21 @@ def __wrapper(conn, strategy_instance, strategy_id, interval, strategy_args):
     logger.warn('task started')
     pid = os.getpid()
     conn.send(pid)
-    round = 0
+    num = 0
     log_service = LogService(strategy_id, pid)
     stop_signal = conn.recv() if conn.poll() else False
     while not stop_signal:
-        logger_strategy = log_service.get_logger(round)
-        logger_strategy.info('start round %d of task: %s' %(round, strategy_id))
-        strategy_args.update({'logger_prefix': '[round-%d]' %(round)})
+        logger_strategy = log_service.get_logger(num)
+        logger_strategy.info('start round %d of task: %s' % (num, strategy_id))
+        strategy_args.update({'logger_prefix': '[round-%d]' % num})
         try:
             #logger_strategy.info('...')
             strategy_instance.run(logger_strategy, strategy_args)
         except:
             logger_strategy.error(traceback.format_exc())
-        logger_strategy.info('end round %d of task: %s' %(round, strategy_id))
+        logger_strategy.info('end round %d of task: %s' %(num, strategy_id))
         log_service.close_logger(logger_strategy)
-        round = round + 1
+        num += 1
         stop_signal = conn.recv() if conn.poll(interval) else False
     logger.warn('task stopped')
 

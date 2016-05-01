@@ -6,12 +6,10 @@ class DBService:
     def __init__(self, config):
         self.__config = config
 
-
     def connect_db(self):
         db = sqlite3.connect(self.__config)
         db.row_factory = sqlite3.Row
         return db
-
 
     def init_db(self):
         with closing(self.connect_db()) as db:
@@ -19,15 +17,15 @@ class DBService:
                 db.cursor().executescript(f.read())
             db.commit()
 
-
-    def query_db(self, db, query, args=(), one=False):
+    @staticmethod
+    def query_db(db, query, args=(), one=False):
         cur = db.execute(query, args)
         rv = cur.fetchall()
         cur.close()
         return (rv[0] if rv else None) if one else rv
 
-
-    def insert_db(self, db, table, fields=(), values=()):
+    @staticmethod
+    def insert_db(db, table, fields=(), values=()):
         cur = db.cursor()
         query = 'INSERT INTO %s (%s) VALUES (%s)' % (
             table, ','.join(fields), ','.join(['?'] * len(values)))

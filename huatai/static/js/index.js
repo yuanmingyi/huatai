@@ -49,9 +49,41 @@ common.market = {
 
 jQuery(function($) {
     var page_id = $(".page-id").text();
+
+    function saveForm() {
+        var forms = $("form");
+        if (forms.length > 0) {
+            var form = forms[0];
+            var data = {}
+            for (var i = 0; i < form.length; i++) {
+                data[form[i].name] = form[i].value;
+            }
+            $.cookie(form.id, JSON.stringify(data));
+        }
+    }
+
+    function loadForm() {
+        var forms = $("form");
+        if (forms.length > 0) {
+            var form = forms[0];
+            var data = $.cookie(form.id);
+            if (!!data) {
+                var form_data = JSON.parse(data);
+                for (var name in form_data) {
+                    if (!!name) {
+                        form[name].value = form_data[name];
+                    }
+                }
+            }
+        }
+    }
+
     $(".nav>li>a").on("click", function() {
+        saveForm();
         window.location.href = $(this).attr("link");
     });
     $(".nav>li").removeClass('active');
     $(".nav>li:contains(" + page_id + ")").addClass('active');
+
+    loadForm();
 });
