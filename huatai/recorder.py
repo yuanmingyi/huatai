@@ -10,7 +10,7 @@ class Recorder:
     def save_action(self, name, action, detail, reason, result = None):
         updated_time = created_time = time.time()
         id = DBService.insert_db(self.__db, self.__table_name,
-                            ['name', 'action', 'detail', 'reason', 'result', 'created_time', 'updated_time'],
+                            ['name', 'act', 'detail', 'reason', 'result', 'created_time', 'updated_time'],
                             [name, action, detail, reason, result, created_time, updated_time])
         return id
 
