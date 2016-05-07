@@ -1,1 +1,1 @@
-web: python huatai.py
+web: gunicorn -w 1 -b :$PORT huatai.py
