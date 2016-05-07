@@ -1,0 +1,7 @@
+# configuration
+DATABASE = 'SAE_MYSQL_HOST_M'
+DB_PORT = 'SAE_MYSQL_PORT'
+DEBUG = True
+# SECRET_KEY = 'development key'
+USERNAME = 'SAE_MYSQL_USER'
+PASSWORD = 'SAE_MYSQL_PASS'

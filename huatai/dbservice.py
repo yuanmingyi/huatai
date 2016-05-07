@@ -34,3 +34,16 @@ class DBService:
         id = cur.lastrowid
         cur.close()
         return id
+
+    @staticmethod
+    def update_db(db, table, where_fields={}, update_fields={}):
+        cur = db.cursor()
+        where_clause = ' and '.join(['%s=%s' % (key, str(where_fields[key])) for key in where_fields])
+        if where_clause == '':
+            where_clause = '1=1'
+        update_clause = ','.join(['%s=?' % key for key in update_fields])
+        query = 'UPDATE %s set %s where %s' % (table, update_clause, where_clause)
+        cur.execute(query, update_fields.values())
+        db.commit()
+        cur.close()
+
