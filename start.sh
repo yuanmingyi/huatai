@@ -1,3 +1,3 @@
 source env/bin/activate
-python runserver.py
+gunicorn -w 1 -b :5000 huatai:app
 deactivate

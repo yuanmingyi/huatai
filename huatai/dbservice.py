@@ -1,19 +1,21 @@
-import sqlite3
+import sqlite3, os
 from contextlib import closing
 
 
 class DBService:
+    __dir = os.path.dirname(__file__)
+
     def __init__(self, config):
         self.__config = config
 
     def connect_db(self):
-        db = sqlite3.connect(self.__config)
+        db = sqlite3.connect(os.path.join(self.__dir, self.__config))
         db.row_factory = sqlite3.Row
         return db
 
     def init_db(self):
         with closing(self.connect_db()) as db:
-            with open('schema.sql', mode='r') as f:
+            with open(os.path.join(self.__dir, 'schema.sql'), mode='r') as f:
                 db.cursor().executescript(f.read())
             db.commit()
 
