@@ -1,7 +1,8 @@
 from multiprocessing import Lock
 
+
 class ThreadSafeDict:
-    def __init__(self, dictionary = None):
+    def __init__(self, dictionary=None):
         self.__dict = dictionary if dictionary is not None else dict()
         self.__lock = Lock()
 
@@ -36,7 +37,7 @@ class ThreadSafeDict:
 
     def has_key(self, key):
         with self.__lock:
-            return self.__dict.has_key(key)
+            return key in self.__dict
 
     def length(self):
         with self.__lock:

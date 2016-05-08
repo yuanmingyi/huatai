@@ -6,11 +6,11 @@ import time
 import traceback
 from multiprocessing import Process, Pipe
 
-from huatai.strategies import strategies_loader as loader
-from huatai.utilities.threadsafedict import ThreadSafeDict
-from logservice import LogService
+from strategies import strategies_loader as loader
+from utilities.threadsafedict import ThreadSafeDict
+from recorder import Recorder
 
-print 'load strategies_loader in ', os.getpid()
+
 __tasks = ThreadSafeDict()
 
 
@@ -35,15 +35,16 @@ def get_all_running_strategies():
     return __tasks.keys()
 
 
-def get_log(strategy_id, round, count):
-    logger = logging.getLogger(__name__)
-    value = __tasks.get(strategy_id)
-    if value is None:
-        logger.warn('strategy %s is not running' % strategy_id)
-        return -1, ''
-    pipe, pid = value
-    logservice = LogService(strategy_id, pid)
-    return logservice.get_log_content(round, count)
+def get_log(strategy_id, round, count, pid=-1):
+    if pid == -1:
+        logger = logging.getLogger(__name__)
+        value = __tasks.get(strategy_id)
+        if value is None:
+            logger.warn('strategy_id %r is not running' % strategy_id)
+            return [], -1, -1
+        pipe, pid = value
+    logs, round_num = Recorder.get_action_log(strategy_id, pid, round, count)
+    return logs, pid, round_num
 
 
 def start(strategy_name, interval, strategy_args):
@@ -80,24 +81,21 @@ def stop(strategy_id):
 
 
 def __wrapper(conn, strategy_instance, strategy_id, interval, strategy_args):
-    logger = logging.getLogger(__name__)
-    logger.warn('task started')
     pid = os.getpid()
+    logger = logging.getLogger(strategy_id)
+    logger.warn('task started')
     conn.send(pid)
     num = 0
-    log_service = LogService(strategy_id, pid)
     stop_signal = conn.recv() if conn.poll() else False
     while not stop_signal:
-        logger_strategy = log_service.get_logger(num)
-        logger_strategy.info('start round %d of task: %s' % (num, strategy_id))
-        strategy_args.update({'logger_prefix': '[round-%d]' % num})
+        logger.info('start round %d of task: %s' % (num, strategy_id))
+        strategy_args.update({'logger_prefix': '[round-%d]' % num,
+                              'strategy_id': strategy_id, 'pid': pid, 'round': num})
         try:
-            #logger_strategy.info('...')
-            strategy_instance.run(logger_strategy, strategy_args)
+            strategy_instance.run(logger, strategy_args)
         except:
-            logger_strategy.error(traceback.format_exc())
-        logger_strategy.info('end round %d of task: %s' %(num, strategy_id))
-        log_service.close_logger(logger_strategy)
+            logger.error(traceback.format_exc())
+        logger.info('end round %d of task: %s' % (num, strategy_id))
         num += 1
         stop_signal = conn.recv() if conn.poll(interval) else False
     logger.warn('task stopped')

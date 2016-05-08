@@ -525,14 +525,15 @@ function HuataiAssist() {
         });
     }
 
-    this.getStrategyStatus = function(strategyId, round, count, callback) {
+    this.getStrategyStatus = function(strategyId, start_id, count, pid, callback) {
         var url = baseAutoUrl + strategyId;
         return $.ajax({
             "url": url,
             "method": "GET",
             "data": {
-                "round": round,
-                "count": count
+                "start_id": start_id,
+                "count": count,
+                "pid": pid
             },
             "complete": function(jqXhr, textStatus) {
                 callback(textStatus === "success" ? "" : textStatus, jqXhr.responseText);

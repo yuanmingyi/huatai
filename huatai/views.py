@@ -1,20 +1,5 @@
 from huatai import app
-from flask import render_template, g
-
-from dbservice import DBService
-db_service = DBService(app.config['DATABASE'])
-
-
-@app.before_request
-def before_request():
-    g.db = db_service.connect_db()
-
-
-@app.teardown_request
-def teardown_request(exception):
-    db = getattr(g, 'db', None)
-    if db is not None:
-        db.close()
+from flask import render_template
 
 
 @app.route('/')

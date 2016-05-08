@@ -121,10 +121,11 @@ def api_stop_auto(strategy_id):
 
 @app.route(auto_path + '<strategy_id>', methods=['GET'])
 def api_get_auto_status(strategy_id):
-    round = int(request.args.get('round', '-1'))
+    start_id = int(request.args.get('start_id', '-1'))
     count = int(request.args.get('count', '10'))
-    end_round, log = strategy_manager.get_log(strategy_id, round, count)
-    return json.dumps({'end_round': end_round, 'log_content': log})
+    pid = int(request.args.get('pid', '-1'))
+    log, pid, end_id = strategy_manager.get_log(strategy_id, start_id, count, pid)
+    return json.dumps({'end_id': end_id, 'pid': pid, 'log_content': log})
 
 
 @app.route(auto_path, methods=['GET'])

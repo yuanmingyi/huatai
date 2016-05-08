@@ -1,4 +1,5 @@
 from flask import Flask
+from dbservice import DBService
 import logging.config
 import os
 
@@ -12,6 +13,8 @@ if deployment_mode == 'sae_product':
 
 app.config.from_object(config_object)
 logging.config.fileConfig('huatai/logging.conf')
+
+db = DBService.init_db(app)
 
 import huatai.views
 import huatai.controller

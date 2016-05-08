@@ -1,6 +1,7 @@
 # configuration
-DATABASE = 'data/huatai.db'
+DB_SCHEMA = 'sqlite'
+DB_HOST = '/'
+DATABASE = 'tmp/huatai.db'
 DEBUG = True
 SECRET_KEY = 'development key'
-USERNAME = 'admin'
-PASSWORD = 'default'
+#SQLALCHEMY_COMMIT_ON_TEARDOWN = True

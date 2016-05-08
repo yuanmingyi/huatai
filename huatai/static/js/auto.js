@@ -11,19 +11,21 @@ jQuery(function($) {
             var strategy_name = data[i];
             $("#auto-strategy-name").append("<option value='" + strategy_name + "'>" + strategy_name + "</option>");
         }
+        refreshStatus();
     });
 
     function startTimer() {
-        var round = -1, count = 10;
+        var start_id = -1, count = 10;
         return setInterval(function() {
-            huatai.getStrategyStatus(strategyId, round, count, function(err, d) {
+            huatai.getStrategyStatus(strategyId, start_id, count, -1, function(err, d) {
                 if (!!err) {
                     logger.append(d);
                 } else {
                     result = JSON.parse(d);
-                    round = result["end_round"];
-                    logger.appendLogs(result["log_content"]);
-                    if (round == -1) {
+                    logs = result["log_content"];
+                    start_id = result["end_id"];
+                    logger.appendLines(logs);
+                    if (result["pid"] == -1) {
                         // the strategy has been stopped
                         toggle.text("start");
                     } else {

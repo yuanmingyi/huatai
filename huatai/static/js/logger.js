@@ -49,6 +49,13 @@ function loggerBuilder(domOrSelector) {
                 con.scrollTop(con[0].scrollHeight);
             }
         },
+        "appendLines": function(lines) {
+            text = con.html();
+            for (var i = 0; i < lines.length; i++) {
+                text += lines[i] + '<br>';
+            }
+            con.html(text);
+        },
         "appendLogs": function(text) {
             this.append(text.replace(/\n/g,'<br>'));
         }

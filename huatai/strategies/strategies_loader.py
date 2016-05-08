@@ -4,6 +4,7 @@ import simple
 from huatai.utilities.threadsafedict import ThreadSafeDict
 from strategy import Strategy
 
+
 __strategies = ThreadSafeDict()
 def register_strategy(strategy_name, strategy_instance):
     logger_root = logging.getLogger(__name__)
