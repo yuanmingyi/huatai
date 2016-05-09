@@ -7,21 +7,23 @@ class DBService:
 
     @staticmethod
     def init_db(app):
-        db_user = app.config.get('DB_USERNAME', None)
-        db_pass = app.config.get('DB_PASSWORD', None)
-        db_port = app.config.get('DB_PORT', None)
+        db_user = app.config.get('DB_USERNAME', '')
+        db_pass = app.config.get('DB_PASSWORD', '')
+        db_port = app.config.get('DB_PORT', '')
         schema_sec = app.config['DB_SCHEMA']
         user_sec = ''
-        if db_user is not None:
+        if db_user != '':
             user_sec = db_user
-            if db_pass is not None:
+            if db_pass != '':
                 user_sec += ':' + db_pass
             user_sec += '@'
         server_sec = app.config['DB_HOST']
-        if db_port is not None:
+        if db_port != '':
             server_sec += ':' + db_port
         database_sec = app.config['DATABASE']
-        app.config['SQLALCHEMY_DATABASE_URI'] = '%s://%s%s/%s' % (schema_sec, user_sec, server_sec, database_sec)
+        app.config['SQLALCHEMY_DATABASE_URI'] = database_uri =\
+            '%s://%s%s/%s' % (schema_sec, user_sec, server_sec, database_sec)
+        print 'database uri: ', database_uri
         return SQLAlchemy(app)
 
     @staticmethod
