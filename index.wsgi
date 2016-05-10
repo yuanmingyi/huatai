@@ -1,5 +1,5 @@
 import sae
-sae.add_vendor_dir('env/lib/python2.7/site-packages')
+sae.add_vendor_dir('env')
 
 import os
 os.environ['DEPLOYMENT_MODE'] = 'sae_product'
