@@ -9,3 +9,21 @@ handlers:
 - url: /static/
   static_path: huatai/static
   gzip: on
+
+cron:
+- description: cron_1
+  url: /cron/run/1
+  schedule: "*/5 * * * *"
+- description: cron_2
+  url: /cron/run/2
+  schedule: "*/5 * * * *"
+- description: cron_3
+  url: /cron/run/3
+  schedule: "*/5 * * * *"
+- description: cron_4
+  url: /cron/run/4
+  schedule: "*/5 * * * *"
+- description: cron_5
+  url: /cron/run/5
+  schedule: "*/5 * * * *"
+
