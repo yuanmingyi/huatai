@@ -13,7 +13,7 @@ class Recorder:
     def get_action_log(strategy_id, pid, start_id=-1, limit=-1):
         query = StrategyLog.query\
             .filter(StrategyLog.strategy_id == strategy_id,
-                    StrategyLog.pid == pid,
+                    #StrategyLog.pid == pid,
                     StrategyLog.id >= start_id)\
             .order_by(StrategyLog.updated_time)
         if limit > 0 and start_id >= 0:
@@ -27,10 +27,10 @@ class Recorder:
         return log_content, result[-1].id + 1
 
     @staticmethod
-    def save_action(name, strategy_id, pid, round_num, action, detail, reason, result=None):
+    def save_action(name, strategy_id, pid, round_num, action, detail, reason, result=True):
         updated_time = created_time = datetime.datetime.utcnow()
         strategy_log = StrategyLog(name=name, strategy_id=strategy_id, pid=pid, round_num=round_num, act=action, detail=detail,
-                                   reason=reason, result=result, created_time=created_time, updated_time=updated_time)
+                                   reason=reason, result=StrategyLog.get_result(result), created_time=created_time, updated_time=updated_time)
         db.session.add(strategy_log)
         db.session.commit()
         return strategy_log.id

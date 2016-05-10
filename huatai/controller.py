@@ -6,7 +6,7 @@ import base64
 import json
 import logging
 import command
-import strategy_manager
+import strategy_manager_2 as strategy_manager
 import random
 
 
@@ -16,6 +16,7 @@ trade_path = '/api/trade/'
 hq_path = '/api/hq/'
 auto_path = '/api/auto/'
 auto_strategies_path = '/api/strategies'
+cron_path = '/cron/<int:time_gap>/<int:slot_id>'
 
 # huatai configuration
 base_url = 'https://service.htsc.com.cn'
@@ -138,6 +139,12 @@ def api_get_auto_running_strategies():
 def api_get_all_strategies():
     strategies = strategy_manager.get_all_available_strategies()
     return json.dumps(strategies)
+
+
+@app.route(cron_path, methods=['GET'])
+def api_refresh(time_gap, slot_id):
+    strategy_manager.runner(time_gap, slot_id)
+    return 'ok'
 
 
 def get_cookies():

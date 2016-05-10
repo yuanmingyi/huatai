@@ -36,5 +36,5 @@ class StrategyLog(db.Model):
                 self.reason, self.result)
 
     @staticmethod
-    def result(success):
+    def get_result(success):
         return 'SUCCESS' if success else 'FAILURE'

@@ -18,7 +18,7 @@ class Simple(strategy.Strategy):
         threshold = strategy_args['threshold']
         user = strategy_args['user_info']
 
-        Recorder.save_action(self.__name, strategy_id, pid, round_num, 'start new round', '', '', 'SUCCESS')
+        Recorder.save_action(self.__name, strategy_id, pid, round_num, 'start new round', '', '', True)
 
         err, data = command.get_withdraw_list(user)
         if err is not None:
