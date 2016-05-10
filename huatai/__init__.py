@@ -12,7 +12,7 @@ if deployment_mode == 'sae_product':
     config_object = 'config.sae_product'
 
 app.config.from_object(config_object)
-logging.config.fileConfig('huatai/logging.conf')
+logging.config.fileConfig(app.config['LOGGING_CONF'])
 
 db = DBService.init_db(app)
 
