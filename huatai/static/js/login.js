@@ -4,7 +4,7 @@ jQuery(function($) {
     function init() {
         $("#captcha").attr("src", huatai.getCaptchaUrl());
         huatai.getLoginStatus(function(data) {
-            $("#login-status").text(data);
+            $("#online-state").text(data);
         });
     }
 
