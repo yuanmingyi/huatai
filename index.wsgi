@@ -1,5 +1,5 @@
 import sae
-sae.add_vendor_dir('env')
+sae.add_vendor_dir('lib')
 
 import os
 os.environ['DEPLOYMENT_MODE'] = 'sae_product'
