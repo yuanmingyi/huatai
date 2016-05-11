@@ -7,10 +7,12 @@ from datetime import datetime
 from huatai import db
 from model.taskexecutor import TaskExecutor
 from recorder import Recorder
-from strategies import strategies_loader as loader
+from flask import current_app
+from strategies.strategies_loader import StrategyLoaderKey
 
 
 def get_all_available_strategies():
+    loader = current_app[StrategyLoaderKey]
     return loader.get_all_strategy_names()
 
 
@@ -31,6 +33,7 @@ def get_log(strategy_id, round, count, pid=-1):
 
 def start(strategy_name, interval, strategy_args):
     logger_root = logging.getLogger(__name__)
+    loader = current_app[StrategyLoaderKey]
     strategy_instance = loader.get_strategy_instance(strategy_name)
     if strategy_instance is None:
         logger_root.warn('cannot create task from name: ' + strategy_name)
@@ -74,6 +77,7 @@ def stop(strategy_id):
 
 
 def runner(time_gap, slot_id):
+    loader = current_app[StrategyLoaderKey]
     slot = TaskExecutor.query.get(slot_id)
     # time gap in second
     time_gap_s = time_gap * 60

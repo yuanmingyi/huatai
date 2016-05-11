@@ -16,6 +16,9 @@ logging.config.fileConfig(app.config['LOGGING_CONF'])
 
 db = DBService.init_db(app)
 
+from strategies.strategies_loader import StrategiesLoader, StrategyLoaderKey
+app.config[StrategyLoaderKey] = StrategiesLoader()
+
 import huatai.views
 import huatai.controller
 import huatai.errorhandler
