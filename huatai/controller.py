@@ -55,7 +55,7 @@ def api_login():
 def api_get_login_status():
     global user_info
     user_info = command.get_user_info(get_cookies())
-    return 'offline' if user_info is None else 'online'
+    return 'not login' if user_info is None else user_info['client_name']
 
 
 @app.route(captcha_path, methods=['GET'])

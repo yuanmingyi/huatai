@@ -10,7 +10,7 @@ jQuery(function($) {
 
     init();
 
-    $("#refresh").on("click", null, null, function() {
+    $("#captcha").on("click", null, null, function() {
         init();
     });
 
