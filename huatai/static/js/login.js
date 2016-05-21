@@ -27,7 +27,7 @@ jQuery(function($) {
         loginButton.prop("disabled", true);
         if (loginButton.text() === "login") {
             huatai.login(vcode, function(jqXHR, status) {
-                common.updateStatus("login", status);
+                common.updateStatus("login", jqXHR.responseText);
                 init();
                 loginButton.prop("disabled", false);
             });

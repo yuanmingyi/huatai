@@ -42,7 +42,7 @@ def api_login():
     global user_info
     cookies = get_cookies()
     captcha = request.values.get('captcha', '')
-    logger.info('cookies: ' + str(cookies))
+    logger.info('cookies: ' + repr(cookies))
     success = command.login(captcha, cookies)
     if success:
         user_info = command.get_user_info(cookies)
@@ -54,13 +54,17 @@ def api_login():
 @app.route(login_path, methods=['GET'])
 def api_get_login_status():
     global user_info
-    user_info = command.get_user_info(get_cookies())
+    cookies = get_cookies()
+    logger.info('cookies: ' + repr(cookies))
+    user_info = command.get_user_info(cookies)
     return 'not login' if user_info is None else user_info['client_name']
 
 
 @app.route(captcha_path, methods=['GET'])
 def api_get_captcha():
-    r = requests.get(captcha_url, cookies = get_cookies())
+    cookies = get_cookies()
+    logger.info('cookies: ' + repr(cookies))
+    r = requests.get(captcha_url, cookies=cookies)
     return r.content, r.status_code
 
 

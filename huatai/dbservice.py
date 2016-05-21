@@ -29,7 +29,22 @@ class DBService:
     @staticmethod
     def create_table(database):
         db = sqlalchemy.create_engine(database, echo=True)
-        db.execute('create table strategy_log(id integer primary key not null, name char(20) not null, '
-                   'strategy_id char(20) not null, pid int not null, round_num int not null, '
+        db.execute('create table if not exists strategy_log (id integer primary key not null, name char(20) not null, '
+                   'strategy_id char(20) not null, pid integer not null, round_num integer not null, '
                    'act char(20) not null, detail text, reason text, result char(20), '
                    'created_time datetime not null, updated_time datetime not null)')
+        db.execute('create index strategy_id on strategy_log (strategy_id, pid)')
+        db.execute('create table if not exists task_executor (id integer primary key not null, name char(20), '
+                   'strategy_id char(40) unique, time_interval int(4), round_num int(4), parameters text, '
+                   'status int(2) not null, created_time datetime not null, updated_time datetime not null)')
+        db.execute('create index status on task_executor (status)')
+        db.execute("insert into task_executor (id, name, strategy_id, time_interval, round_num, parameters, status, "
+                   "created_time, updated_time) values "
+                   "(1, NULL, NULL, NULL, NULL, NULL, 0, '2016-05-11 10:45:17', '2016-05-11 10:45:23'),"
+                   "(2, NULL, NULL, NULL, NULL, NULL, 0, '2016-05-11 10:46:44', '2016-05-11 10:46:44'),"
+                   "(3, NULL, NULL, NULL, NULL, NULL, 0, '2016-05-11 10:46:44', '2016-05-11 10:46:44'),"
+                   "(4, NULL, NULL, NULL, NULL, NULL, 0, '2016-05-11 10:49:47', '2016-05-11 10:49:47'),"
+                   "(5, NULL, NULL, NULL, NULL, NULL, 0, '2016-05-11 10:49:47', '2016-05-11 10:49:47'),"
+                   "(6, NULL, NULL, NULL, NULL, NULL, 0, '2016-05-11 10:49:47', '2016-05-11 10:49:47'),"
+                   "(7, NULL, NULL, NULL, NULL, NULL, 0, '2016-05-11 10:49:47', '2016-05-11 10:49:47'),"
+                   "(8, NULL, NULL, NULL, NULL, NULL, 0, '2016-05-11 10:49:47', '2016-05-11 10:49:47');")

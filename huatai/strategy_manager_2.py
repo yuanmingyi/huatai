@@ -12,7 +12,7 @@ from strategies.strategies_loader import StrategyLoaderKey
 
 
 def get_all_available_strategies():
-    loader = current_app[StrategyLoaderKey]
+    loader = current_app.config[StrategyLoaderKey]
     return loader.get_all_strategy_names()
 
 

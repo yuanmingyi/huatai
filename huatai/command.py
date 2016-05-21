@@ -41,7 +41,7 @@ def login(captcha, cookies):
         'vcode': captcha
     }
     logger.info('login param: ' + urllib.urlencode(params))
-    r = requests.post(login_url, data = params, headers = get_session_header(cookies), cookies = cookies)
+    r = requests.post(login_url, data=params, headers=get_session_header(cookies), cookies=cookies)
     if r.status_code != 200:
         print 'login failed'
         return False
