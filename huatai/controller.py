@@ -131,3 +131,4 @@ def api_get_all_strategies():
 def api_refresh(time_gap, slot_id):
     strategy_manager.runner(time_gap, slot_id)
     return 'ok'
+
