@@ -2,9 +2,9 @@ import os, logging, logging.handlers, shutil
 
 
 class LogService:
-    def __init__(self, strategy_id, pid, level = logging.DEBUG,\
-                 fmt = '%(asctime)s-%(process)d-%(filename)s:%(lineno)d-%(levelname)s %(message)s'):
-        self.__dir_name = 'logs/%s_%d' %(strategy_id, pid)
+    def __init__(self, strategy_id, pid, level = logging.DEBUG,
+                 fmt='%(asctime)s-%(process)d-%(filename)s:%(lineno)d-%(levelname)s %(message)s'):
+        self.__dir_name = 'logs/%s_%d' % (strategy_id, pid)
         self.__level = level
         self.__fmt = fmt
         if not os.path.isdir(self.__dir_name):

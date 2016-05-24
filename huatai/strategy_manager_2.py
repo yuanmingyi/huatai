@@ -33,7 +33,7 @@ def get_log(strategy_id, round, count, pid=-1):
 
 def start(strategy_name, interval, strategy_args):
     logger_root = logging.getLogger(__name__)
-    loader = current_app[StrategyLoaderKey]
+    loader = current_app.config[StrategyLoaderKey]
     strategy_instance = loader.get_strategy_instance(strategy_name)
     if strategy_instance is None:
         logger_root.warn('cannot create task from name: ' + strategy_name)
@@ -52,7 +52,7 @@ def start(strategy_name, interval, strategy_args):
         slot.strategy_id = strategy_id
         slot.updated_time = datetime.utcnow()
         slot.name = strategy_name
-        slot.interval = interval
+        slot.time_interval = interval
         slot.parameters = json.dumps(strategy_args)
         slot.status = TaskExecutor.WORKING_STATUS
         slot.count = 0
@@ -77,7 +77,7 @@ def stop(strategy_id):
 
 
 def runner(time_gap, slot_id):
-    loader = current_app[StrategyLoaderKey]
+    loader = current_app.config[StrategyLoaderKey]
     slot = TaskExecutor.query.get(slot_id)
     # time gap in second
     time_gap_s = time_gap * 60
@@ -99,7 +99,7 @@ def runner(time_gap, slot_id):
             except:
                 logger.error(traceback.format_exc())
             logger.info('end round %d of task: %s' % (round_num, strategy_id))
-        time.sleep(slot.interval)
+        time.sleep(slot.time_interval)
 
 
 def __generate_strategy_id(strategy_name, strategy_args):

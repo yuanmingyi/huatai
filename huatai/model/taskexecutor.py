@@ -9,19 +9,19 @@ class TaskExecutor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), nullable=False)
     strategy_id = db.Column(db.String(40), nullable=False, unique=True)
-    interval = db.Column(db.Integer, nullable=False)
+    time_interval = db.Column(db.Integer, nullable=False)
     round_num = db.Column(db.Integer, nullable=False)
     parameters = db.Column(db.Text, nullable=True)
     status = db.Column(db.Integer, nullable=False)
     created_time = db.Column(db.DateTime, nullable=False)
     updated_time = db.Column(db.DateTime, nullable=False)
 
-    def __init__(self, identity=None, name='', strategy_id=None, interval=1, round_num=0,
+    def __init__(self, identity=None, name='', strategy_id=None, time_interval=1, round_num=0,
                  parameters=None, status=0, created_time=None, updated_time=None):
         self.id = identity
         self.name = name
         self.strategy_id = strategy_id
-        self.interval = interval
+        self.time_interval = time_interval
         self.round_num = round_num
         self.parameters = parameters
         self.status = status

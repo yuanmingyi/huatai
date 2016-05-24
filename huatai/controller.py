@@ -19,33 +19,17 @@ auto_strategies_path = '/api/strategies'
 cron_path = '/cron/<int:time_gap>/<int:slot_id>'
 
 # huatai configuration
-base_url = 'https://service.htsc.com.cn'
-login_url = base_url + '/service/loginAction.do?method=login'
-logout_url = base_url + '/service/login.jsp?logout=yes'
-hq_url = base_url + '/service/wsyyt/hq.jsp?sub_top=hq'
-jy_url = base_url + '/service/jy.jsp?sub_top=jy'
-
-captcha_url = base_url + '/service/pic/verifyCodeImage.jsp'
-bi_url = base_url + '/service/flashbusiness_new3.jsp?etfCode='
 trade_api_url = 'https://tradegw.htsc.com.cn/'
 hq_api_url = 'http://hq.htsc.com.cn/cssweb'
 
-logger = logging.getLogger(__name__)
-
-# global variables
-user_info = None
-__cookies = None
 
 # ajax requests
 @app.route(login_path, methods=['POST'])
 def api_login():
-    global user_info
-    cookies = get_cookies()
     captcha = request.values.get('captcha', '')
-    logger.info('cookies: ' + repr(cookies))
-    success = command.login(captcha, cookies)
+    success = command.login(captcha)
     if success:
-        user_info = command.get_user_info(cookies)
+        user_info = command.refresh_user_info()
         if user_info is not None:
             return 'login successfully'
     return 'login failed'
@@ -53,23 +37,18 @@ def api_login():
 
 @app.route(login_path, methods=['GET'])
 def api_get_login_status():
-    global user_info
-    cookies = get_cookies()
-    logger.info('cookies: ' + repr(cookies))
-    user_info = command.get_user_info(cookies)
+    user_info = command.refresh_user_info()
     return 'not login' if user_info is None else user_info['client_name']
 
 
 @app.route(captcha_path, methods=['GET'])
 def api_get_captcha():
-    cookies = get_cookies()
-    logger.info('cookies: ' + repr(cookies))
-    r = requests.get(captcha_url, cookies=cookies)
-    return r.content, r.status_code
+    return command.get_captcha()
 
 
 @app.route(trade_path, methods=['GET'])
 def api_trade():
+    user_info = command.get_user_info()
     if user_info is None:
         return 'login first', 403
     ex_type = request.args.get('exchange_type', '')
@@ -103,6 +82,7 @@ def api_hq():
 
 @app.route(auto_path + '<strategy_name>', methods=['POST'])
 def api_start_auto(strategy_name):
+    logger = logging.getLogger(__name__)
     stock_code = request.values.get('stock_code')
     stock_amount = int(request.values.get('amount', '100'))
     interval = float(request.values.get('interval', '5'))
@@ -110,8 +90,10 @@ def api_start_auto(strategy_name):
     if stock_amount <= 0:
         logger.warn('stock amount must be greater than 0')
         return json.dumps({'code':'error'})
-    strategy_id = strategy_manager.start(strategy_name, interval,
-                                         {'stock_code': stock_code, 'stock_amount': stock_amount, 'threshold': threshold, 'user_info': user_info})
+    user_info = command.get_user_info()
+    strategy_id = strategy_manager.start(
+        strategy_name, interval,
+        {'stock_code': stock_code, 'stock_amount': stock_amount, 'threshold': threshold, 'user_info': user_info})
     code = ''
     if strategy_id is None:
         code = 'error'
@@ -149,12 +131,3 @@ def api_get_all_strategies():
 def api_refresh(time_gap, slot_id):
     strategy_manager.runner(time_gap, slot_id)
     return 'ok'
-
-
-def get_cookies():
-    global __cookies
-    if __cookies is None:
-        res = requests.get(base_url)
-        __cookies = res.cookies
-        logger.info('cookies refresh: %s' % __cookies)
-    return __cookies

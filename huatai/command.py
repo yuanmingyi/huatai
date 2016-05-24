@@ -8,9 +8,12 @@ import base64
 import urllib
 import os
 from httplib2 import Http
+from authservice import AuthService
+
 
 print 'load command in ', os.getpid()
 
+login_host = 'service.htsc.com.cn'
 trade_api_url = 'https://tradegw.htsc.com.cn/'
 hq_api_url = 'http://hq.htsc.com.cn/cssweb'
 base_url = 'https://service.htsc.com.cn'
@@ -23,24 +26,12 @@ def market_to_exchange(market):
     return 'sh' if int(market) == 1 else ('sz' if int(market) == 2 else None)
 
 
-def login(captcha, cookies):
+def login(captcha):
     logger = logging.getLogger(__name__)
-    secure = load_config()
-    params = {
-        'userType': 'jy',
-        'loginEvent': 1,
-        'trdpwdEns': secure.get('login', 'trdpwd'),
-        'macaddr': secure.get('login', 'mac'),
-        'hddInfo': secure.get('login', 'hdd'),
-        'lipInfo': secure.get('login', 'ip'),
-        'topath': None,
-        'accountType': 1,
-        'userName': secure.get('login', 'user_id'),
-        'servicePwd': secure.get('login', 'pwd'),
-        'trdpwd': secure.get('login', 'trdpwd'),
-        'vcode': captcha
-    }
+    params = make_login_params(captcha)
     logger.info('login param: ' + urllib.urlencode(params))
+    cookies = get_cookies()
+    logger.info('cookies: ' + repr(cookies))
     r = requests.post(login_url, data=params, headers=get_session_header(cookies), cookies=cookies)
     if r.status_code != 200:
         print 'login failed'
@@ -48,37 +39,57 @@ def login(captcha, cookies):
     return True
 
 
-def get_user_info(cookies):
+def get_user_info():
+    auth_data = AuthService.get_auth_data()
+    if auth_data is None:
+        return None
+    else:
+        return auth_data[2]
+
+
+def refresh_user_info():
     logger = logging.getLogger(__name__)
-    #logger.info('login result: ' + r.content)
+    user = None
     try:
-        r = requests.get(bi_url, headers = get_session_header(cookies), cookies = cookies)
+        cookies = get_cookies()
+        r = requests.get(bi_url, headers=get_session_header(cookies), cookies=cookies)
+        #logger.debug('response: ' + r.content)
         p = re.compile(r'<script\s+.*?>\s*var data ?= ?"(.*?)";\s*</script>', re.I | re.M)
         m = p.search(r.content)
         d = m.group(1)
         user = json.loads(d.decode('base64').decode('gbk'))
-        return user
     except Exception, e:
         logger.error('not login: ' + str(e))
-        return None
+    AuthService.update_auth_data(user_info=user)
+    return user
 
 
 def get_cookies():
-    res = requests.get(base_url)
-    return res.cookies
+    logger = logging.getLogger(__name__)
+    auth_data = AuthService.get_auth_data()
+    if auth_data is None:
+        res = requests.get(base_url)
+        cookies = res.cookies
+        logger.info('cookies refresh: %r' % cookies)
+        AuthService.insert_auth_data(cookies.get('JSESSIONID'), cookies.get('SESSION_COOKIE'))
+    else:
+        session_id, session_cookie, user_info = auth_data
+        cookies = requests.cookies.RequestsCookieJar()
+        cookies.set_cookie(
+            requests.cookies.create_cookie('JSESSIONID', session_id.decode('utf8'), domain=login_host, path='/'))
+        cookies.set_cookie(
+            requests.cookies.create_cookie('SESSION_COOKIE', session_cookie.decode('utf8'), domain=login_host, path='/'))
+    return cookies
 
 
 def get_session_header(cookies):
     return {'JSESSIONID': cookies.get('JSESSIONID')}
 
 
-def get_captcha(cookies):
-    logger = logging.getLogger(__name__)
-    r = requests.get(captcha_url, cookies = cookies)
-    if r.status_code == 200:
-        return r.content
-    logger.warn('get captcha failed: ' + str(r.status_code) + ':' + r.content)
-    return None
+def get_captcha():
+    cookies = get_cookies()
+    r = requests.get(captcha_url, cookies=cookies)
+    return r.content, r.status_code
 
 
 def send_trade_req(user, params, req_type, func_id, ex_type):
@@ -273,6 +284,25 @@ def query_detail(stock_code, stock_type, market):
         data = data['data'][0]
 
     return err, data
+
+
+def make_login_params(captcha):
+    secure = load_config()
+    params = {
+        'userType': 'jy',
+        'loginEvent': 1,
+        'trdpwdEns': secure.get('login', 'trdpwd'),
+        'macaddr': secure.get('login', 'mac'),
+        'hddInfo': secure.get('login', 'hdd'),
+        'lipInfo': secure.get('login', 'ip'),
+        'topath': None,
+        'accountType': 1,
+        'userName': secure.get('login', 'user_id'),
+        'servicePwd': secure.get('login', 'pwd'),
+        'trdpwd': secure.get('login', 'trdpwd'),
+        'vcode': captcha
+    }
+    return params
 
 
 def load_config():
