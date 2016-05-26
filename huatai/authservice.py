@@ -11,15 +11,15 @@ class AuthService:
     @staticmethod
     def get_auth_data():
         logger = logging.getLogger(__name__)
-        result = AuthData.query.filter().first()
-        if result is None:
+        result = AuthData.query.filter().all()
+        if len(result) == 0:
             return None
-        user_info = result.user_info
+        user_info = result[0].user_info
         if user_info is None:
             logger.info('user is not login')
         else:
             user_info = json.loads(user_info)
-        return result.session_id, result.session_cookie, user_info
+        return result[0].session_id, result[0].session_cookie, user_info
 
     @staticmethod
     def insert_auth_data(session_id, session_cookie, user_info=None):
@@ -30,10 +30,12 @@ class AuthService:
 
     @staticmethod
     def update_auth_data(session_id=None, session_cookie=None, user_info=None):
-        auth_data = AuthData.query.filter().first()
+        auth_data = AuthData.query.filter().all()
+        if len(auth_data) == 0:
+            return
         if session_id is not None:
-            auth_data.session_id = session_id
+            auth_data[0].session_id = session_id
         if session_cookie is not None:
-            auth_data.session_cookie = session_cookie
-        auth_data.user_info = None if user_info is None else json.dumps(user_info)
+            auth_data[0].session_cookie = session_cookie
+        auth_data[0].user_info = None if user_info is None else json.dumps(user_info)
         db.session.commit()
