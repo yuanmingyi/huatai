@@ -38,7 +38,7 @@ class DBService:
                    'created_time datetime not null, updated_time datetime not null)')
         db.execute('create index strategy_id on strategy_log (strategy_id, pid)')
         db.execute('create table task_executor (id integer primary key not null, name char(20), '
-                   'strategy_id char(40) unique, time_interval int(4), round_num int(4), parameters text, '
+                   'strategy_id char(40) unique, time_interval float(4), round_num int(4), parameters text, '
                    'status int(2) not null, created_time datetime not null, updated_time datetime not null)')
         db.execute('create index status on task_executor (status)')
         db.execute("insert into task_executor (id, name, strategy_id, time_interval, round_num, parameters, status, "

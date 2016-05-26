@@ -9,7 +9,7 @@ class TaskExecutor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), nullable=False)
     strategy_id = db.Column(db.String(40), nullable=False, unique=True)
-    time_interval = db.Column(db.Integer, nullable=False)
+    time_interval = db.Column(db.Float(4), nullable=False)
     round_num = db.Column(db.Integer, nullable=False)
     parameters = db.Column(db.Text, nullable=True)
     status = db.Column(db.Integer, nullable=False)

@@ -11,7 +11,7 @@ class AuthService:
     @staticmethod
     def get_auth_data():
         logger = logging.getLogger(__name__)
-        result = AuthData.query.first()
+        result = AuthData.query.filter().first()
         if result is None:
             return None
         user_info = result.user_info
@@ -30,7 +30,7 @@ class AuthService:
 
     @staticmethod
     def update_auth_data(session_id=None, session_cookie=None, user_info=None):
-        auth_data = AuthData.query.first()
+        auth_data = AuthData.query.filter().first()
         if session_id is not None:
             auth_data.session_id = session_id
         if session_cookie is not None:
