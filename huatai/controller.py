@@ -68,7 +68,7 @@ def api_trade():
             + '&password=' + user_info['trdpwd'] \
             + '&identity_type=&stock_account=' + stock_account \
             + '&ram=' + str(random.random())
-    r = requests.get(trade_api_url, params = base64.b64encode(querystring.encode('utf-8')));
+    r = requests.get(trade_api_url, params = base64.b64encode(querystring.encode('utf-8')))
     data = base64.b64decode(r.text).decode('gbk')
     return data
 
@@ -88,7 +88,7 @@ def api_start_auto(strategy_name):
     interval = float(request.values.get('interval', '5'))
     threshold = float(request.values.get('threshold', '0.01'))
     if stock_amount <= 0:
-        logger.warn('stock amount must be greater than 0')
+        logger.warn('api_start_auto(): stock amount must be greater than 0')
         return json.dumps({'code':'error'})
     user_info = command.get_user_info()
     strategy_id = strategy_manager.start(

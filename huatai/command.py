@@ -11,8 +11,6 @@ from httplib2 import Http
 from authservice import AuthService
 
 
-print 'load command in ', os.getpid()
-
 login_host = 'service.htsc.com.cn'
 trade_api_url = 'https://tradegw.htsc.com.cn/'
 hq_api_url = 'http://hq.htsc.com.cn/cssweb'
@@ -29,12 +27,11 @@ def market_to_exchange(market):
 def login(captcha):
     logger = logging.getLogger(__name__)
     params = make_login_params(captcha)
-    logger.info('login param: ' + urllib.urlencode(params))
-    cookies = get_cookies()
-    logger.info('cookies: ' + repr(cookies))
-    r = requests.post(login_url, data=params, headers=get_session_header(cookies), cookies=cookies)
+    logger.info('login(): login param: ' + urllib.urlencode(params))
+    cookies, user = get_cookie_and_user()
+    r = requests.post(login_url, data=params, headers=get_session_header(cookies))
     if r.status_code != 200:
-        print 'login failed'
+        logger.info('login(): login failed')
         return False
     return True
 
@@ -44,51 +41,66 @@ def get_user_info():
     if auth_data is None:
         return None
     else:
-        return auth_data[2]
+        return auth_data[1]
 
 
 def refresh_user_info():
     logger = logging.getLogger(__name__)
-    user = None
-    try:
-        cookies = get_cookies()
-        r = requests.get(bi_url, headers=get_session_header(cookies), cookies=cookies)
-        #logger.debug('response: ' + r.content)
-        p = re.compile(r'<script\s+.*?>\s*var data ?= ?"(.*?)";\s*</script>', re.I | re.M)
-        m = p.search(r.content)
-        d = m.group(1)
-        user = json.loads(d.decode('base64').decode('gbk'))
-    except Exception, e:
-        logger.error('not login: ' + str(e))
-    AuthService.update_auth_data(user_info=user)
+    cookies, user = get_cookie_and_user()
+    if user is None:
+        try:
+            r = requests.get(bi_url, headers=get_session_header(cookies))
+            #logger.debug('response: ' + r.content)
+            p = re.compile(r'<script\s+.*?>\s*var data ?= ?"(.*?)";\s*</script>', re.I | re.M)
+            m = p.search(r.content)
+            d = m.group(1)
+            user = json.loads(d.decode('base64').decode('gbk'))
+        except Exception, e:
+            logger.error('refresh_user_info(): not login: ' + repr(e))
+        AuthService.update_auth_data(user_info=user)
+        logger.info('refresh_user_info(): user updated: ' + repr(user))
+
     return user
 
 
-def get_cookies():
+def get_cookie_and_user():
     logger = logging.getLogger(__name__)
     auth_data = AuthService.get_auth_data()
-    if auth_data is None:
-        res = requests.get(base_url)
-        cookies = res.cookies
-        logger.info('cookies refresh: %r' % cookies)
-        AuthService.insert_auth_data(cookies.get('JSESSIONID'), cookies.get('SESSION_COOKIE'))
-    else:
-        session_id, session_cookie, user_info = auth_data
-        cookies = requests.cookies.RequestsCookieJar()
-        cookies.set_cookie(
-            requests.cookies.create_cookie('JSESSIONID', session_id.decode('utf8'), domain=login_host, path='/'))
-        cookies.set_cookie(
-            requests.cookies.create_cookie('SESSION_COOKIE', session_cookie.decode('utf8'), domain=login_host, path='/'))
-    return cookies
+    headers = {}
+    if auth_data is not None and auth_data[0] is not None:
+        headers['Cookie'] = auth_data[0]
+    logger.info('get_cookies(): headers=' + repr(headers))
+    res = requests.get(base_url, headers=headers)
+    cookies = res.headers.get('Set-Cookie')
+    if cookies is not None:
+        logger.info('get_cookies(): cookies refresh: %r' % cookies)
+        AuthService.insert_or_update_auth_data(cookies)
+        return cookies, None
+    logger.info('get_cookies(): cookies=' + auth_data[0])
+    return auth_data
 
 
 def get_session_header(cookies):
-    return {'JSESSIONID': cookies.get('JSESSIONID')}
+    logger = logging.getLogger(__name__)
+    session_id = parse_cookie(cookies, 'JSESSIONID')
+    logger.debug('get_session_header(): session id=' + session_id)
+    return {'Cookie': cookies, 'JSESSIONID': session_id}
+
+
+def parse_cookie(cookies, key):
+    for cookie_token in cookies.split(','):
+        cookie = cookie_token.split(';')
+        for cookie_part in cookie:
+            idx = cookie_part.index('=')
+            name = cookie_part[:idx]
+            if name.strip() == key:
+                return cookie_part[idx+1:].strip()
+    return None
 
 
 def get_captcha():
-    cookies = get_cookies()
-    r = requests.get(captcha_url, cookies=cookies)
+    cookies, user = get_cookie_and_user()
+    r = requests.get(captcha_url, headers={'Cookie': cookies})
     return r.content, r.status_code
 
 

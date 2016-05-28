@@ -25,7 +25,7 @@ def get_log(strategy_id, round, count, pid=-1):
     logger = logging.getLogger(__name__)
     task = TaskExecutor.query.filter_by(strategy_id=strategy_id, status=TaskExecutor.WORKING_STATUS).first()
     if task is None:
-        logger.warn('strategy_id %r is not running' % strategy_id)
+        logger.warn('get_log(): strategy_id %r is not running' % strategy_id)
         return [], -1, -1
     logs, round_num = Recorder.get_action_log(strategy_id, -1, round, count)
     return logs, 0, round_num
@@ -36,18 +36,18 @@ def start(strategy_name, interval, strategy_args):
     loader = current_app.config[StrategyLoaderKey]
     strategy_instance = loader.get_strategy_instance(strategy_name)
     if strategy_instance is None:
-        logger_root.warn('cannot create task from name: ' + strategy_name)
+        logger_root.warn('start(): cannot create task from name: ' + strategy_name)
         return None
     strategy_id = __generate_strategy_id(strategy_name, strategy_args)
     task = TaskExecutor.query.filter_by(strategy_id=strategy_id, status=TaskExecutor.WORKING_STATUS).first()
     if task is not None:
-        logger_root.warn('task %s already run' % strategy_id)
+        logger_root.warn('start(): task %s already run' % strategy_id)
         return strategy_id
     else:
-        logger_root.info('create new task for: ' + strategy_name)
+        logger_root.info('start(): create new task for: ' + strategy_name)
         slot = TaskExecutor.query.filter_by(status=TaskExecutor.FREE_STATUS).first()
         if slot is None:
-            logger_root.warn('task slot is full. cannot create any more task')
+            logger_root.warn('start(): task slot is full. cannot create any more task')
             return None
         slot.strategy_id = strategy_id
         slot.updated_time = datetime.utcnow()
@@ -71,9 +71,9 @@ def stop(strategy_id):
     if task is not None:
         task.status = TaskExecutor.FREE_STATUS
         db.session.commit()
-        logger_root.info('task %s (slot id=%d) is stopped' % (strategy_id, task.id))
+        logger_root.info('stop(): task %s (slot id=%d) is stopped' % (strategy_id, task.id))
     else:
-        logger_root.warn('task %s not found' % strategy_id)
+        logger_root.warn('stop(): task %s not found' % strategy_id)
 
 
 def runner(time_gap, slot_id):
@@ -91,15 +91,15 @@ def runner(time_gap, slot_id):
             strategy_args = json.loads(slot.parameters)
             round_num = slot.count
             logger = logging.getLogger(strategy_id)
-            logger.info('start round %d of task: %s' % (round_num, strategy_id))
+            logger.info('runner(): start round %d of task: %s' % (round_num, strategy_id))
             strategy_args.update({'logger_prefix': '[round-%d]' % round_num,
                                   'strategy_id': strategy_id, 'pid': -1, 'round': round_num})
             try:
                 strategy_instance.run(logger, strategy_args)
             except:
                 logger.error(traceback.format_exc())
-            logger.info('end round %d of task: %s' % (round_num, strategy_id))
-        time.sleep(slot.time_interval)
+            logger.info('runner(): end round %d of task: %s' % (round_num, strategy_id))
+        time.sleep(slot.time_interval if slot.time_interval is not None else 5)
 
 
 def __generate_strategy_id(strategy_name, strategy_args):

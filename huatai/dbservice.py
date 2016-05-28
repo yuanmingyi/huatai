@@ -52,4 +52,4 @@ class DBService:
                    "(7, NULL, NULL, NULL, NULL, NULL, 0, '2016-05-11 10:49:47', '2016-05-11 10:49:47'),"
                    "(8, NULL, NULL, NULL, NULL, NULL, 0, '2016-05-11 10:49:47', '2016-05-11 10:49:47');")
         db.execute('create table auth_data (id integer primary key not null, '
-                   'session_id char(255) not null unique, session_cookie char(50), user_info text)')
+                   'cookie char(255) not null unique, user_info text)')

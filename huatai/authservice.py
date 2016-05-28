@@ -11,31 +11,43 @@ class AuthService:
     @staticmethod
     def get_auth_data():
         logger = logging.getLogger(__name__)
-        result = AuthData.query.filter().all()
-        if len(result) == 0:
+        result = AuthData.query.first()
+        if result is None:
+            logger.warn('get_auth_data(): no auth data found!')
             return None
-        user_info = result[0].user_info
-        if user_info is None:
-            logger.info('user is not login')
-        else:
+        user_info = result.user_info
+        if user_info is not None:
             user_info = json.loads(user_info)
-        return result[0].session_id, result[0].session_cookie, user_info
+        return result.cookie, user_info
 
     @staticmethod
-    def insert_auth_data(session_id, session_cookie, user_info=None):
-        auth_data = AuthData(session_id=session_id, session_cookie=session_cookie, user_info=user_info)
+    def insert_or_update_auth_data(cookie, user_info=None):
+        auth_data = AuthData.query.first()
+        if auth_data is None:
+            auth_data = AuthData(cookie=cookie, user_info=user_info)
+            db.session.add(auth_data)
+        else:
+            if cookie is not None:
+                auth_data.cookie = cookie
+            auth_data.user_info = None if user_info is None else json.dumps(user_info)
+        db.session.commit()
+        return auth_data.id
+
+    @staticmethod
+    def insert_auth_data(cookie, user_info=None):
+        auth_data = AuthData(cookie=cookie, user_info=user_info)
         db.session.add(auth_data)
         db.session.commit()
         return auth_data.id
 
     @staticmethod
-    def update_auth_data(session_id=None, session_cookie=None, user_info=None):
-        auth_data = AuthData.query.filter().all()
-        if len(auth_data) == 0:
+    def update_auth_data(cookie=None, user_info=None):
+        logger = logging.getLogger(__name__)
+        auth_data = AuthData.query.first()
+        if auth_data is None:
+            logger.warn('update auth data failed: no auth data found!')
             return
-        if session_id is not None:
-            auth_data[0].session_id = session_id
-        if session_cookie is not None:
-            auth_data[0].session_cookie = session_cookie
-        auth_data[0].user_info = None if user_info is None else json.dumps(user_info)
+        if cookie is not None:
+            auth_data.cookie = cookie
+        auth_data.user_info = None if user_info is None else json.dumps(user_info)
         db.session.commit()
