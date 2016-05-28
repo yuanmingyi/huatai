@@ -23,12 +23,14 @@ class DBService:
         database_sec = app.config['DATABASE']
         app.config['SQLALCHEMY_DATABASE_URI'] = database_uri =\
             '%s://%s%s/%s' % (schema_sec, user_sec, server_sec, database_sec)
+        app.config['SQLALCHEMY_ECHO'] = True
+        app.config['SQLALCHEMY_RECORD_QUERIES'] = True
         print 'database uri: ', database_uri
         return SQLAlchemy(app)
 
     @staticmethod
     def create_table(database):
-        db = sqlalchemy.create_engine(database, echo=True)
+        db = sqlalchemy.create_engine(database)
         db.execute('drop table if exists strategy_log')
         db.execute('drop table if exists task_executor')
         db.execute('drop table if exists auth_data')

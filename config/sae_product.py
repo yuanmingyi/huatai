@@ -6,6 +6,6 @@ DB_PORT = sae.const.MYSQL_PORT #os.getenv('SAE_MYSQL_PORT')
 DB_USERNAME = sae.const.MYSQL_USER #os.getenv('SAE_MYSQL_USER')
 DB_PASSWORD = sae.const.MYSQL_PASS #os.getenv('SAE_MYSQL_PASS')
 DATABASE = sae.const.MYSQL_DB
-DEBUG = False
+DEBUG = True
 LOGGING_CONF = 'config/logging_sae.conf'
 #SQLALCHEMY_COMMIT_ON_TEARDOWN = True
