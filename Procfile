@@ -1,1 +1,1 @@
-web: gunicorn -w 1 -b :$PORT huatai.py
+web: env/bin/gunicorn -w 4 -b :$PORT huatai.py

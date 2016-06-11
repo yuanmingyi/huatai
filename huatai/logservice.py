@@ -1,6 +1,9 @@
 import os, logging, logging.handlers, shutil
 
 
+"""
+"" this is not used
+"""
 class LogService:
     def __init__(self, strategy_id, pid, level = logging.DEBUG,
                  fmt='%(asctime)s-%(process)d-%(filename)s:%(lineno)d-%(levelname)s %(message)s'):

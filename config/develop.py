@@ -1,7 +1,9 @@
 # configuration
-DB_SCHEMA = 'sqlite'
-DB_HOST = '/'
-DATABASE = 'tmp/huatai.db'
+DB_SCHEMA = 'mysql'
+DB_HOST = 'localhost'
+DB_USERNAME = 'root'
+DB_PASSWORD = 'ymy-1984'
+DATABASE = 'huatai'
 DEBUG = True
 SECRET_KEY = 'development key'
 LOGGING_CONF = 'config/logging_debug.conf'

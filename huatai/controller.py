@@ -22,7 +22,6 @@ cron_path = '/cron/<int:time_gap>/<int:slot_id>'
 trade_api_url = 'https://tradegw.htsc.com.cn/'
 hq_api_url = 'http://hq.htsc.com.cn/cssweb'
 
-
 # ajax requests
 @app.route(login_path, methods=['POST'])
 def api_login():
@@ -68,14 +67,18 @@ def api_trade():
             + '&password=' + user_info['trdpwd'] \
             + '&identity_type=&stock_account=' + stock_account \
             + '&ram=' + str(random.random())
-    r = requests.get(trade_api_url, params = base64.b64encode(querystring.encode('utf-8')))
+    r = requests.get(trade_api_url, params=base64.b64encode(querystring.encode('utf-8')))
     data = base64.b64decode(r.text).decode('gbk')
+    # r, data = Http().request(trade_api_url + '?' + base64.b64encode(querystring.encode('utf-8')))
+    # data = base64.b64decode(data).decode('gbk')
     return data
 
 
 @app.route(hq_path, methods=['GET'])
 def api_hq():
     url = hq_api_url + '?type=' + request.args.get('type')
+    logger = logging.getLogger(__name__)
+    logger.info('hq uri: ' + url)
     res, content = Http().request(url)
     return content, res.status
 

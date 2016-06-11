@@ -3,6 +3,8 @@ from dbservice import DBService
 import logging.config
 import os
 
+print 'init huatai...'
+
 # create the application
 app = Flask(__name__)
 
