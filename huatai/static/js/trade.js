@@ -29,8 +29,7 @@ jQuery(function($) {
         }
     });
 
-    $(formTrade["entrust"]).submit(function(e) {
-        e.preventDefault();
+    $(formTrade["entrust"]).on("click", function(e) {
         var func = $(formTrade["entrust-type"]).val(), market, stockCode, stockAmount, price;
         if (!func) {
             alert("invalid entrust type!");
@@ -51,35 +50,35 @@ jQuery(function($) {
     function startRefresh() {
         var code = $(formTrade["stock-code"]).val();
         var timeout = $(formTrade["timeout"]).val() * 1000;
-        if (code.length === 6) {
-            huatai.queryStock(code, function(err, data) {
+
+        huatai.getAssetInfo(function(err, data) {
+            if (!err) {
+                common.renderTableTemplate("#table-fund", "#temp-fund", data);
+            } else {
+                common.updateStatus(err, data);
+            }
+            huatai.getOwnedStockInfo(function(err, data) {
                 if (!err) {
-                    setStockData(data);
+                    common.renderTableTemplate("#table-stocks", "#temp-stock", data);
                 } else {
                     common.updateStatus(err, data);
                 }
+                if (code.length === 6) {
+                    huatai.queryStock(code, function(err, data) {
+                        if (!err) {
+                            setStockData(data);
+                        } else {
+                            common.updateStatus(err, data);
+                        }
+                        if (timeout > 0) {
+                            setTimeout(startRefresh, timeout);
+                        }
+                    });
+                } else if (timeout > 0) {
+                    setTimeout(startRefresh, timeout);
+                }
             });
-        }
-
-        huatai.getAssetInfo(function(err, data) {
-        	if (!err) {
-        		common.renderTableTemplate("#table-fund", "#temp-fund", data);
-        	} else {
-        		common.updateStatus(err, data);
-        	}
         });
-
-        huatai.getOwnedStockInfo(function(err, data) {
-        	if (!err) {
-        		common.renderTableTemplate("#table-stocks", "#temp-stock", data);
-        	} else {
-        		common.updateStatus(err, data);
-        	}
-        });
-
-        if (timeout > 0) {
-            setTimeout(startRefresh, timeout);
-        }
     };
 
     startRefresh();

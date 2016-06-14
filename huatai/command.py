@@ -112,35 +112,43 @@ def get_captcha():
     return content, r.status
 
 
-def send_trade_req(user, params, req_type, func_id, ex_type):
+def send_trade_req(user, params, req_type=None, func_id=None, ex_type=None):
+    logger = logging.getLogger(__name__)
+    _params = params.copy()
+    if req_type is not None:
+        _params['cssweb_type'] = req_type
+    if func_id is not None:
+        _params['function_id'] = func_id
+    if ex_type is not None:
+        _params['exchange_type'] = ex_type
     if user is None:
-        return 'error', 'user not login'
+        logger.warn('user not login')
+        return 'error', 'user not login', None
     accounts = user['item']
     stock_account = ''
+    ex_type = _params.get('exchange_type', '')
     for account in accounts:
         if account['exchange_type'] == str(ex_type):
             stock_account = account['stock_account']
             break
     querystring = 'uid=' + user['uid'] \
-            + '&cssweb_type=' + req_type \
-            + '&version=1&custid=' + user['account_content'] \
-            + '&op_branch_no=' + user['branch_no'] \
-            + '&branch_no=' + user['branch_no'] \
-            + '&op_entrust_way=7&op_station=' + user['op_station'] \
-            + '&function_id=' + func_id \
-            + '&fund_account=' + user['fund_account'] \
-            + '&password=' + user['trdpwd'] \
-            + '&identity_type=&exchange_type=' + str(ex_type) \
-            + '&stock_account=' + stock_account \
-            + '&' \
-            + '&'.join([key + '=' + str(params[key]) for key in params])
+                  + '&version=1&custid=' + user['account_content'] \
+                  + '&op_branch_no=' + user['branch_no'] \
+                  + '&branch_no=' + user['branch_no'] \
+                  + '&op_entrust_way=7&op_station=' + user['op_station'] \
+                  + '&fund_account=' + user['fund_account'] \
+                  + '&password=' + user['trdpwd'] \
+                  + '&identity_type=&stock_account=' + stock_account \
+                  + '&' \
+                  + '&'.join([key + '=' + str(_params[key]) for key in _params])
     querystring = querystring + '&ram=' + str(random.random())
-
+    logger.info('send request: "%s" to url: %s' % (querystring, trade_api_url))
     r = requests.get(trade_api_url, params=base64.b64encode(querystring.encode('utf-8')))
-    result = r.text.decode('base64').decode('gbk')
     # r, content = http.request('%s?%s' % (trade_api_url, base64.b64encode(querystring.encode('utf-8'))))
-    # result = content.decode('base64').decode('gbk')
-
+    logger.info('get result string: %s' % r.text)
+    result = base64.b64decode(r.text).decode('gbk').replace('\n', '')
+    # result = r.text.decode('base64').decode('gbk')
+    logger.info('get result: %s' % result)
     data = json.loads(result)
     err = None
     if data['cssweb_code'] != 'success':
@@ -148,7 +156,7 @@ def send_trade_req(user, params, req_type, func_id, ex_type):
         data = data['cssweb_msg']
     else:
         data = data['item']
-    return err, data
+    return err, data, result
 
 
 def buy(user, market, stock_code, entrust_amount, entrust_price):

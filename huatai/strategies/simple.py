@@ -20,7 +20,7 @@ class Simple(strategy.Strategy):
 
         Recorder.save_action(self.__name, strategy_id, pid, round_num, 'start new round', '', '', True)
 
-        err, data = command.get_withdraw_list(user)
+        err, data, result = command.get_withdraw_list(user)
         if err is not None:
             logger.error('%s get withdraw list failed: %s' %(logger_prefix, data))
             return
@@ -61,7 +61,7 @@ class Simple(strategy.Strategy):
         if diff < threshold:
             if item is not None:
                 logger.warn('%s cancel last entrust: %s' %(logger_prefix, item['entrust_no']))
-                err, data = command.cancel_entrust(user, item['entrust_no'])
+                err, data, result = command.cancel_entrust(user, item['entrust_no'])
                 Recorder.save_action(self.__name, strategy_id, pid,
                                      round_num, 'withdraw', repr(item), reason, err is None)
                 if err is not None:
@@ -75,7 +75,7 @@ class Simple(strategy.Strategy):
         new_price = bjw1 + 0.001
         if item is None:
             logger.warn('%s no entrust. make a new entrust' % (logger_prefix))
-            err, d = command.buy(user, market, stock_code, stock_amount, new_price)
+            err, d, result = command.buy(user, market, stock_code, stock_amount, new_price)
             buyinfo = {'stock':stock_code, 'amount':stock_amount, 'price':new_price}
             Recorder.save_action(self.__name, strategy_id, pid, round_num, 'buy', repr(buyinfo), 'short pos', err is None)
             if err is not None:
@@ -87,14 +87,14 @@ class Simple(strategy.Strategy):
         if float(item['entrust_price']) != new_price:
             reason = 'bp(%r) != b1(%.3f) + 0.001' % (item['entrust_price'], bjw1)
             logger.warn('%s %s, cancel and redo' % logger_prefix, reason)
-            err, d = command.cancel_entrust(user, item['entrust_no'])
+            err, d, result = command.cancel_entrust(user, item['entrust_no'])
             Recorder.save_action(self.__name, strategy_id, pid, round_num, 'withdraw', repr(item), reason, err is None)
             if err is not None:
                 logger.error('%s cancel entrust: %s failed: %s' % (logger_prefix, item['entrust_no'], d))
             else:
                 logger.info('%s cancel entrust success: %s' % (logger_prefix, item['entrust_no']))
             logger.warn('%s make a new entrust with %.3f' % (logger_prefix, new_price))
-            err, d = command.buy(user, market, stock_code, stock_amount, new_price)
+            err, d, result = command.buy(user, market, stock_code, stock_amount, new_price)
             buyinfo = {'stock':stock_code, 'amount':stock_amount, 'price':new_price}
             Recorder.save_action(self.__name, strategy_id, pid, round_num,
                                  'buy', repr(buyinfo), 'update order price', err is None)

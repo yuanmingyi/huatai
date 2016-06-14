@@ -47,31 +47,13 @@ def api_get_captcha():
 
 @app.route(trade_path, methods=['GET'])
 def api_trade():
+    logger = logging.getLogger(__name__)
     user_info = command.get_user_info()
     if user_info is None:
+        logger.warn('user not login')
         return 'login first', 403
-    ex_type = request.args.get('exchange_type', '')
-    accounts = user_info['item']
-    stock_account = ''
-    for account in accounts:
-        if account['exchange_type'] == str(ex_type):
-            stock_account = account['stock_account']
-            break
-    querystring = '&'.join([key + '=' + str(request.args.get(key)) for key in request.args]) \
-            + '&uid=' + user_info['uid'] \
-            + '&version=1&custid=' + user_info['account_content'] \
-            + '&op_branch_no=' + user_info['branch_no'] \
-            + '&branch_no=' + user_info['branch_no'] \
-            + '&op_entrust_way=7&op_station=' + user_info['op_station'] \
-            + '&fund_account=' + user_info['fund_account'] \
-            + '&password=' + user_info['trdpwd'] \
-            + '&identity_type=&stock_account=' + stock_account \
-            + '&ram=' + str(random.random())
-    r = requests.get(trade_api_url, params=base64.b64encode(querystring.encode('utf-8')))
-    data = base64.b64decode(r.text).decode('gbk')
-    # r, data = Http().request(trade_api_url + '?' + base64.b64encode(querystring.encode('utf-8')))
-    # data = base64.b64decode(data).decode('gbk')
-    return data
+    err, data, result = command.send_trade_req(user_info, request.args)
+    return result
 
 
 @app.route(hq_path, methods=['GET'])

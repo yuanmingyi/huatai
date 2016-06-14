@@ -27,10 +27,11 @@ jQuery(function($) {
                     setStockData(data);
                 }
                 common.updateStatus(err, data);
+                if (timeout > 0) {
+                    setTimeout(startRefresh, timeout);
+                }
             });
-        }
-
-        if (timeout > 0) {
+        } else if (timeout > 0) {
             setTimeout(startRefresh, timeout);
         }
     };
